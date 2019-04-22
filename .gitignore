@@ -2,3 +2,6 @@
 *.bak
 old/
 clean.sh
+elm-stuff/
+index.html
+make.sh
