@@ -6,7 +6,7 @@ This little project is a test-of-concept for integration of [Futhark](https://fu
 
 ## Project structure
 
-The Futhark and server files are in `./futhark-server`.  The file for (the start of) the Elm client are in `./src`
+The Futhark and server files are in `./futhark-server`.  The files for (the start of) the Elm client are in `./src`
 
 ## Running the example
 
