@@ -33,7 +33,7 @@ display (heat map) of the data received.  See
 https://jxxcarlson.github.io/app/heat-model.html
 for a pure Elm version.  The Elm + Python + Futhark
 implementation will allow one to work with much
-larger heat fields (say, 100x100). All this is really 
+larger heat fields (say, 100x100). All this is really
 a test for other models based on the
 state -> f(state) idea which are computationally
 more expensive. If there were a pure Elm bridge
@@ -58,10 +58,11 @@ Send a POST request::
 
 ## http://introtopython.org/classes.html
 
+
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-import SocketServer
 import os
+import json
 import numpy as np
 import heat # import heat.py
 
@@ -75,10 +76,16 @@ heatKernel = heat.heat()
 # Set up test data.  In future version,
 # the test data will be received from the
 # client by HTTP.
-n = 10
+n = 6 # I'v tried n = 1000; works fine
 data = np.zeros(n*n).reshape(n,n)
-data[3,3]=1
+data[3,3]=1; data[0,1]=0.5; data[0,2]=0.5
 array = np.array(data, dtype=np.float32)
+print type(data)
+print data
+# https://markhneedham.com/blog/2018/04/07/python-serialize-deserialize-numpy-2d-arrays/
+# byte_output = array.tobytes()
+# array_format = np.frombuffer(byte_output)
+
 
 # The class which manages state
 class Data():
@@ -87,6 +94,9 @@ class Data():
 
   def step(self):
         self.state = heatKernel.main(1, 0.5, self.state)
+        print len(self.state), len(self.state[0])
+        print self.state
+        print type(self.state)
 
 myData = Data()
 
@@ -102,7 +112,7 @@ class S(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self._set_headers()
-        self.wfile.write(str(myData.state))
+        self.wfile.write(myData.state)
         myData.step()
 
     def do_HEAD(self):

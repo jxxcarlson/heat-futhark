@@ -5,3 +5,7 @@ clean.sh
 elm-stuff/
 index.html
 make.sh
+.idea/
+futhark-server/_heat.c
+futhark-server/_heat.o
+futhark-server/_heat.so

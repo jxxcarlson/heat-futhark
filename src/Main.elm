@@ -14,6 +14,8 @@ import Element.Font as Font
 import Element.Input as Input
 import HeatMap exposing (HeatMap)
 import Time exposing (Posix)
+import Configuration
+import Http
 
 
 tickInterval : Float
@@ -38,6 +40,8 @@ type alias Model =
     , beta : Float
     , betaString : String
     , heatMap : HeatMap
+    , data : String
+    , message : String
     }
 
 
@@ -47,6 +51,10 @@ type AppState
     | Paused
 
 
+
+-- MSG
+
+
 type Msg
     = NoOp
     | InputBeta String
@@ -54,6 +62,8 @@ type Msg
     | Tick Posix
     | AdvanceAppState
     | Reset
+    | GetData
+    | GotData (Result Http.Error String)
 
 
 type alias Flags =
@@ -69,6 +79,8 @@ init flags =
       , beta = 0.1
       , betaString = "0.1"
       , heatMap = HeatMap.randomHeatMap ( 50, 50 )
+      , data = ""
+      , message = ""
       }
     , Cmd.none
     )
@@ -121,6 +133,29 @@ update msg model =
         Reset ->
             ( { model | counter = 0, appState = Ready, heatMap = HeatMap.randomHeatMap ( 50, 50 ) }, Cmd.none )
 
+        GetData ->
+            ( { model | message = "Getting data" }, getData )
+
+        GotData (Ok str) ->
+            ( { model | data = Debug.log "data" str }, Cmd.none )
+
+        GotData (Err err) ->
+            ( { model | message = "Error getting data" }, Cmd.none )
+
+
+
+--
+-- BACKEND
+--
+
+
+getData : Cmd Msg
+getData =
+    Http.get
+        { url = Configuration.host
+        , expect = Http.expectString GotData
+        }
+
 
 
 --
@@ -142,10 +177,11 @@ mainColumn model =
             , row [ spacing 18 ]
                 [ resetButton
                 , runButton model
-                , row [ spacing 8 ] [ stepButton, counterDisplay model ]
+                , row [ spacing 8 ] [ getDataButton, stepButton, counterDisplay model ]
                 , inputBeta model
                 ]
             , el [ Font.size 14, centerX ] (text "Run with 0 < beta < 1.0")
+            , el [ Font.size 14 ] (text model.message)
             ]
         ]
 
@@ -186,6 +222,16 @@ stepButton =
         [ Input.button buttonStyle
             { onPress = Just Step
             , label = el [ centerX, centerY ] (text "Step")
+            }
+        ]
+
+
+getDataButton : Element Msg
+getDataButton =
+    row [ centerX ]
+        [ Input.button buttonStyle
+            { onPress = Just GetData
+            , label = el [ centerX, centerY ] (text "Get data")
             }
         ]
 

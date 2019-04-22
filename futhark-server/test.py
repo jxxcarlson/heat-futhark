@@ -1,6 +1,7 @@
 # Test for FFI.  By pepijndevos
 
 import numpy as np
+import pyopencl
 import _heat
 from futhark_ffi import Futhark
 

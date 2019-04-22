@@ -69,3 +69,7 @@ Use `pip install futhark-ffi` for https://github.com/pepijndevos/futhark-pycffi
 
 
 [pycffi Issue](https://github.com/pepijndevos/futhark-pycffi/issues/8)
+
+## Random references
+
+https://github.com/diku-dk/futhark-with-fangs
