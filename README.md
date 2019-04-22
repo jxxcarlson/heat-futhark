@@ -22,7 +22,7 @@ Then go to http://localhost:8001. Each time you referesh the browser, data will 
 
 Server.py starts up by creating an instance `myData` of the class `Data`.  This class has one instance variable, `state`, which is initialized with a 2D numpy array of float32.  It also has one method, `step`, which applies a transformation `state -> f(state)` to update the state variable.
 
-When `server.py` receives a GET request at http://localhost:8000, it (1) replies with a string representation of `myData.state,` (2) updates `myData.state` using the `step` method. (This process needs to be improved, e.g., by sending binary data rather than a string so as not to incur conversion costs.)
+When `server.py` receives a GET request at http://localhost:8001, it (1) replies with a string representation of `myData.state,` (2) updates `myData.state` using the `step` method. (This process needs to be improved, e.g., by sending binary data rather than a string so as not to incur conversion costs.)
 
 The update function is the discrete heat kernel. It is implemented in `heat.futhark`  To make the code in this file available to server.py, run the command
 
