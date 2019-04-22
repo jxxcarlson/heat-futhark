@@ -4,9 +4,13 @@
 
 This little project is a test-of-concept for integration of [Futhark](https://futhark-lang.org) with [Elm](https://elm-lang.org)  The idea is to off-load computationally expensive work to Futhark, which can use the host's GPU.  The current idea is to run a Python server which calls Futhark code to do the expensive work.  This work is done on demand when the server receives a GET request from the client.  The server holds a `state` which in the example here is a 2D array of floats. On each request, the server sends the current value of `state` to the client, then uses Futhark to perform the update `state -> f(state)` for some function `f` of interest.
 
+## Project structure
+
+The Futhark and server files are in `./futhark-server`.  The file for (the start of) the Elm client are in `./src`
+
 ## Running the example
 
-Do the following:
+Do the following in `./futhark-server/`
 
 ```
 $ futhark pyopencl --library heat.fut
