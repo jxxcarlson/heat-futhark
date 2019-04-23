@@ -77,7 +77,7 @@ heatKernel = heat.heat()
 # the test data will be received from the
 # client by HTTP.
 
-n = 150 # I'v tried n = 1000; works fine
+n = 20 # I've tried n = 1000; works fine
 
 # data = np.zeros(n*n).reshape(n,n)
 # # data[0,0] = 1;
@@ -86,10 +86,10 @@ n = 150 # I'v tried n = 1000; works fine
 # data[1,1]=1; data[2,2]=1;
 # data[3,3]=1; data[0,1]=1.0; data[0,2]=0.5
 # data[5,2]=1; data[5,3] = 1;data[5,4]=1;data[5,5]=1;
-
-data = np.random.rand(n,n)
-array = np.array(data, dtype=np.float32)
-
+#
+# data = np.random.rand(n,n)
+# array = np.array(data, dtype=np.float32)
+#
 
 # `
 # byte_output = array.tobytes()
@@ -98,19 +98,102 @@ array = np.array(data, dtype=np.float32)
 
 # The class which manages state
 class Data():
-  def __init__(self):
+  def __init__(self, n):
+        self.n = n
+        data = np.random.rand(n,n)
+        array = np.array(data, dtype=np.float32)
         self.state = array
         self.count = 0
+        self.iterations = 1
+        self.beta = 0.1
+
 
   def step(self):
-        self.state = heatKernel.main(1, 0.5, self.state)
+        self.state = heatKernel.main(self.iterations,self.beta, self.state)
         self.count = self.count + 1
 
+  def reset(self):
+      data = np.random.rand(self.n,self.n)
+      array = np.array(data, dtype=np.float32)
+      self.state = array
+
+  def set_beta(self, beta):
+      self.beta = beta
 
 
-myData = Data()
+myData = Data(20)
 
 ### END: MANIPULATE DATA USING FUTHARK ####
+
+
+def parse(str):
+    parts = str.lstrip("/").split("=")
+    if len(parts) == 2:
+        return { 'cmd': parts[0], 'arg': parts[1], 'arity': 1}
+    else:
+        return { 'cmd': parts[0], 'arg': "", 'arity': 0}
+
+
+
+def send():
+    if myData.count == 0:
+        dd = myData.state.reshape(1,n*n)[0]
+        print dd
+        return dd.tobytes()
+    else:
+        dd = myData.state.reshape(1,n*n).get()[0]
+        print dd
+        return dd.tobytes()
+    print type(dataToSend)
+    print len(dataToSend)
+
+def step(n_iterations):
+    myData.iterations = int(n_iterations)
+    myData.step()
+    return myData.state.reshape(1,n*n).get()[0].tobytes()
+
+
+def reset():
+    myData.reset()
+    nn = myData.n * myData.n
+    return myData.state.reshape(1,nn).tobytes()
+
+def data():
+    nn = myData.n * myData.n
+    if myData.count == 0:
+        dd = myData.state.reshape(1,nn)[0]
+        print "(0)"
+    else:
+        dd = myData.state.reshape(1,nn).get()[0]
+        print "(>0)"
+    return dd.tobytes()
+
+def beta(beta):
+    myData.set_beta(float(beta))
+    return "beta = " + beta
+
+
+def defaultResponse():
+    return "unknown command"
+
+op = { 'step':  step,
+       'data':  data,
+       'reset': reset,
+       'beta': beta}
+
+
+def response(command_string):
+    c = parse(command_string)
+    if c['cmd'] in op:
+       if c['arity'] == 0:
+           print "cmd = " + c['cmd']
+           return op[c['cmd']]()
+       else:
+           print "cmd = " + c['cmd'] + ", arg = " + c['arg']
+           return op[c['cmd']](c['arg'])
+    else:
+       return defaultResponse()
+
 
 class S(BaseHTTPRequestHandler):
 
@@ -122,20 +205,7 @@ class S(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self._set_headers()
-        print "DATA"
-        if myData.count == 0:
-          dd = myData.state.reshape(1,n*n)[0]
-          print dd
-          dataToSend = dd.tobytes()
-        else:
-          dd = myData.state.reshape(1,n*n).get()[0]
-          print dd
-          dataToSend = dd.tobytes()
-        print type(dataToSend)
-        print len(dataToSend)
-        self.wfile.write(dataToSend)
-
-        myData.step()
+        self.wfile.write(response(self.path))
 
     def do_HEAD(self):
         self._set_headers()

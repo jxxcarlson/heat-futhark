@@ -1,4 +1,4 @@
-module HeatMap exposing (HeatMap(..), renderAsHtml)
+module HeatMap exposing (HeatMap(..), default, renderAsHtml)
 
 {-|  A HeatMap is in effect a 2D array of floats implemented
 as a flat array.  The main purpose of this module is
@@ -10,6 +10,7 @@ to provide both SVG and HTML renditions of HeatMaps.
 import Array exposing (Array)
 import Svg exposing (Svg, svg, rect, g)
 import Svg.Attributes as SA
+import Svg.Lazy
 import Html exposing (Html)
 
 
@@ -17,6 +18,7 @@ type HeatMap
     = HeatMap ( Int, Int ) (Array Float)
 
 
+default = HeatMap (10, 10) <| Array.fromList (List.repeat 100 0.0)
 rows : HeatMap -> Int
 rows (HeatMap ( rows_, _ ) _) =
     rows_
@@ -91,7 +93,6 @@ renderAsSvg cellSize heatMap =
         |> List.map (renderCell cellSize heatMap)
         |> g []
 
-
 renderCell : Float -> HeatMap -> ( Int, Int ) -> Svg msg
 renderCell cellSize heatMap ( i, j ) =
     let
@@ -101,7 +102,7 @@ renderCell cellSize heatMap ( i, j ) =
         color =
             "rgb(" ++ String.fromFloat red ++ ", 0, 0)"
     in
-        gridRect cellSize color ( i, j )
+        Svg.Lazy.lazy3  gridRect cellSize color ( i, j )
 
 
 gridRect : Float -> String -> ( Int, Int ) -> Svg msg
@@ -112,8 +113,5 @@ gridRect size color ( row, col ) =
         , SA.x <| String.fromFloat <| size * (toFloat col)
         , SA.y <| String.fromFloat <| size * (toFloat row)
         , SA.fill color
-
-        --, SA.strokeWidth "1"
-        -- , SA.stroke "rgb(25, 55, 125)"
         ]
         []

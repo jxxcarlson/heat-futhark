@@ -13,6 +13,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
 import Element.Input as Input
+import Element.Keyed as Keyed
 import HeatMap exposing (HeatMap(..))
 import Time exposing (Posix)
 import Configuration
@@ -70,6 +71,7 @@ type Msg
     | Reset
     | GetData
     | GotData (Result Http.Error Bytes)
+    | CommandExecuted (Result Http.Error String)
 
 
 type alias Flags =
@@ -84,11 +86,11 @@ init flags =
       , appState = Ready
       , beta = 0.1
       , betaString = "0.1"
-      , heatMapSize = 150
+      , heatMapSize = 20
       , heatMap = Nothing
       , message = ""
       }
-    , Cmd.none
+    , dataCommand (20*20) "reset"
     )
 
 
@@ -108,12 +110,12 @@ update msg model =
                     ( { model | betaString = str }, Cmd.none )
 
                 Just beta_ ->
-                    ( { model | betaString = str, beta = beta_ }, Cmd.none )
+                    ( { model | betaString = str }, serverCommand <| "beta=" ++ str )
 
         Tick t ->
             case model.appState == Running of
                 True ->
-                    ( { model | counter = model.counter + 1 }, Cmd.none )
+                    ( { model | counter = model.counter + 1 }, dataCommand (nBytesInData model) "step=1")
 
                 False ->
                     ( model, Cmd.none )
@@ -134,15 +136,13 @@ update msg model =
                 ( { model | appState = nextAppState }, Cmd.none )
 
         Reset ->
-            ( { model | counter = 0, appState = Ready, heatMap = Nothing }, Cmd.none )
+            ( { model | counter = 0, appState = Ready, heatMap = Nothing }, dataCommand (nBytesInData model) "reset" )
 
         GetData ->
-            ( { model | message = "Getting data" }, (getData <| 4*model.heatMapSize*model.heatMapSize))
-            --  4*model.heatMapSize*model.heatMapSize
+            ( { model | message = "Getting data" }, dataCommand (nBytesInData model) "step=1")
 
         GotData (Ok bytes) ->
             let
-                _ = Debug.log "Width" (Bytes.width bytes)
                 n_ = model.heatMapSize * model.heatMapSize
             in
             case Bytes.Decode.decode (Utility.decodeArray n_ (Bytes.Decode.float32 LE)) bytes of
@@ -151,26 +151,39 @@ update msg model =
                      let
                         n = model.heatMapSize
                       in
-                        ( { model | message = "Got data",  heatMap = Just <| HeatMap (n,n) array}, Cmd.none )
+                        ( { model | counter = model.counter + 1, message = "Got data",  heatMap = Just <| HeatMap (n,n) array}, Cmd.none )
 
 
         GotData (Err err) ->
             ( { model | message = "Error getting data", heatMap  = Nothing}, Cmd.none )
+
+        CommandExecuted (Ok str) ->
+            ( {model | message = "Command executed: " ++ str}, Cmd.none)
+
+        CommandExecuted (Err err) ->
+                    ( {model | message = "Error executing command"}, Cmd.none)
 
 
 --
 -- BACKEND
 --
 
-
-getData : Int -> Cmd Msg
-getData nBytes =
+serverCommand : String -> Cmd Msg
+serverCommand cmd =
     Http.get
-        { url = Configuration.host
-        , expect = Http.expectBytes GotData (Bytes.Decode.bytes nBytes)
+        { url = Configuration.host ++ "/" ++ cmd
+        , expect = Http.expectString CommandExecuted
         }
 
+dataCommand : Int -> String -> Cmd Msg
+dataCommand dataSize cmd =
+    Http.get
+        { url = Configuration.host ++ "/" ++ cmd
+        , expect = Http.expectBytes GotData (Bytes.Decode.bytes dataSize)
+        }
 
+nBytesInData: Model -> Int
+nBytesInData model = 4*model.heatMapSize*model.heatMapSize
 
 --
 -- VIEW
@@ -189,7 +202,7 @@ mainColumn model =
             [ title "Diffusion of Heat"
             , el [] (renderHeatMap model)
             , row [ spacing 18 ]
-                [ resetButton
+                [ resetButton model
                 , runButton model
                 , row [ spacing 8 ] [ getDataButton, counterDisplay model ]
                 , inputBeta model
@@ -203,8 +216,8 @@ mainColumn model =
 renderHeatMap : Model -> Element Msg
 renderHeatMap model =
     case model.heatMap of
-        Nothing -> Element.none
-        Just heatMap -> el [] (HeatMap.renderAsHtml heatMap |> Element.html)
+        Nothing -> Keyed.el [] (String.fromInt model.counter, (HeatMap.renderAsHtml HeatMap.default |> Element.html))
+        Just heatMap -> Keyed.el [] (String.fromInt model.counter, (HeatMap.renderAsHtml heatMap |> Element.html))
 
 
 counterDisplay : Model -> Element Msg
@@ -270,21 +283,26 @@ activeBackgroundColor model =
             Background.color (Element.rgb 0 0 0)
 
 
-resetButton : Element Msg
-resetButton =
+resetButton : Model -> Element Msg
+resetButton model =
     row [ centerX ]
         [ Input.button buttonStyle
             { onPress = Just Reset
-            , label = el [ centerX, centerY ] (text <| "Reset")
+            , label = el [ centerX, centerY ] (text <| resetLabel model.appState)
             }
         ]
 
+resetLabel : AppState -> String
+resetLabel appState =
+    case appState of
+        Ready -> "Set up"
+        _ -> "Reset"
 
 appStateAsString : AppState -> String
 appStateAsString appState =
     case appState of
         Ready ->
-            "Ready"
+            "Run?"
 
         Running ->
             "Running"
