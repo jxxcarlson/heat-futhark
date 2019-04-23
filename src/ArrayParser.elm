@@ -6,6 +6,11 @@ import Bytes exposing(Bytes)
 import Bytes.Decode exposing(Decoder)
 
 
+--
+-- THIS MODULE IS NOT USED
+--
+
+
 byteArrayDecoder : Decoder (Array Float)
 byteArrayDecoder  =
     Bytes.Decode.succeed Array.empty

@@ -18,7 +18,6 @@ import Configuration
 import Http
 import Array exposing(Array)
 import Utility
-import Hex
 import Bytes exposing(Bytes, Endianness(..))
 import Bytes.Decode
 
@@ -84,7 +83,7 @@ init flags =
       , appState = Ready
       , beta = 0.1
       , betaString = "0.1"
-      , heatMapSize = 6
+      , heatMapSize = 150
       , heatMap = Nothing
       , message = ""
       }
@@ -137,12 +136,11 @@ update msg model =
             ( { model | counter = 0, appState = Ready, heatMap = Nothing }, Cmd.none )
 
         GetData ->
-            ( { model | message = "Getting data" }, (getData <| 144))
+            ( { model | message = "Getting data" }, (getData <| 4*model.heatMapSize*model.heatMapSize))
             --  4*model.heatMapSize*model.heatMapSize
 
         GotData (Ok bytes) ->
             let
-                _ = Debug.log "HEX:" (Hex.fromBytes bytes)
                 _ = Debug.log "Width" (Bytes.width bytes)
                 n_ = model.heatMapSize * model.heatMapSize
             in

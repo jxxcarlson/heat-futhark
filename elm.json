@@ -17,11 +17,9 @@
             "elm/random": "1.0.0",
             "elm/svg": "1.0.1",
             "elm/time": "1.0.0",
-            "jxxcarlson/hex": "2.1.2",
             "mdgriffith/elm-ui": "1.1.0"
         },
         "indirect": {
-            "elm-community/maybe-extra": "5.0.0",
             "elm/file": "1.0.5",
             "elm/url": "1.0.0",
             "elm/virtual-dom": "1.0.2"

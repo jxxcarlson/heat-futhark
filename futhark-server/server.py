@@ -77,17 +77,17 @@ heatKernel = heat.heat()
 # the test data will be received from the
 # client by HTTP.
 
-n = 6 # I'v tried n = 1000; works fine
+n = 150 # I'v tried n = 1000; works fine
 
-data = np.zeros(n*n).reshape(n,n)
-# data[0,0] = 1;
-# data[0,1] = 2;
-# data[0,2] = 3;
-data[1,1]=1; data[2,2]=1;
-data[3,3]=1; data[0,1]=1.0; data[0,2]=0.5
-data[5,2]=1; data[5,3] = 1;data[5,4]=1;data[5,5]=1;
+# data = np.zeros(n*n).reshape(n,n)
+# # data[0,0] = 1;
+# # data[0,1] = 2;
+# # data[0,2] = 3;
+# data[1,1]=1; data[2,2]=1;
+# data[3,3]=1; data[0,1]=1.0; data[0,2]=0.5
+# data[5,2]=1; data[5,3] = 1;data[5,4]=1;data[5,5]=1;
 
-# data = np.random.rand(n,n)
+data = np.random.rand(n,n)
 array = np.array(data, dtype=np.float32)
 
 
