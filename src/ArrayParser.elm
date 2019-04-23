@@ -1,8 +1,14 @@
-module ArrayParser exposing (..)
+module ArrayParser exposing (decodeArray)
 
 import Parser exposing (..)
 import Array exposing (..)
 
+
+
+decodeArray : String -> Maybe (Array (Array Float))
+decodeArray str =
+    run parseArray str
+      |> Result.toMaybe
 
 {-|
 

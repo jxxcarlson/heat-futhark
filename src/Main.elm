@@ -12,10 +12,12 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
 import Element.Input as Input
-import HeatMap exposing (HeatMap)
+import HeatMap exposing (HeatMap(..))
 import Time exposing (Posix)
 import Configuration
 import Http
+import Array exposing(Array)
+import ArrayParser
 
 
 tickInterval : Float
@@ -31,6 +33,7 @@ main =
         , subscriptions = subscriptions
         }
 
+type alias Data = Array (Array Float)
 
 type alias Model =
     { input : String
@@ -39,8 +42,8 @@ type alias Model =
     , appState : AppState
     , beta : Float
     , betaString : String
-    , heatMap : HeatMap
-    , data : String
+    , heatMapSize : Int
+    , heatMap : Maybe HeatMap
     , message : String
     }
 
@@ -58,7 +61,6 @@ type AppState
 type Msg
     = NoOp
     | InputBeta String
-    | Step
     | Tick Posix
     | AdvanceAppState
     | Reset
@@ -78,8 +80,8 @@ init flags =
       , appState = Ready
       , beta = 0.1
       , betaString = "0.1"
-      , heatMap = HeatMap.randomHeatMap ( 50, 50 )
-      , data = ""
+      , heatMapSize = 30
+      , heatMap = Nothing
       , message = ""
       }
     , Cmd.none
@@ -104,13 +106,10 @@ update msg model =
                 Just beta_ ->
                     ( { model | betaString = str, beta = beta_ }, Cmd.none )
 
-        Step ->
-            ( { model | counter = model.counter + 1, heatMap = HeatMap.updateCells model.beta model.heatMap }, Cmd.none )
-
         Tick t ->
             case model.appState == Running of
                 True ->
-                    ( { model | counter = model.counter + 1, heatMap = HeatMap.updateCells model.beta model.heatMap }, Cmd.none )
+                    ( { model | counter = model.counter + 1 }, Cmd.none )
 
                 False ->
                     ( model, Cmd.none )
@@ -131,16 +130,24 @@ update msg model =
                 ( { model | appState = nextAppState }, Cmd.none )
 
         Reset ->
-            ( { model | counter = 0, appState = Ready, heatMap = HeatMap.randomHeatMap ( 50, 50 ) }, Cmd.none )
+            ( { model | counter = 0, appState = Ready, heatMap = Nothing }, Cmd.none )
 
         GetData ->
             ( { model | message = "Getting data" }, getData )
 
         GotData (Ok str) ->
-            ( { model | data = Debug.log "data" str }, Cmd.none )
+            case ArrayParser.decodeArray str of
+                 Nothing -> ( { model | message = "Could not decode data from server"} , Cmd.none)
+                 Just array ->
+                     let
+                        n = model.heatMapSize
+                        row = Array.get 0 array |> Maybe.withDefault Array.empty
+                      in
+                        ( { model | message = "Got data",  heatMap = Just <| HeatMap (n,n) row}, Cmd.none )
+
 
         GotData (Err err) ->
-            ( { model | message = "Error getting data" }, Cmd.none )
+            ( { model | message = "Error getting data", heatMap  = Nothing}, Cmd.none )
 
 
 
@@ -173,17 +180,24 @@ mainColumn model =
     column mainColumnStyle
         [ column [ centerX, spacing 20 ]
             [ title "Diffusion of Heat"
-            , el [] (HeatMap.renderAsHtml model.heatMap |> Element.html)
+            , el [] (renderHeatMap model)
             , row [ spacing 18 ]
                 [ resetButton
                 , runButton model
-                , row [ spacing 8 ] [ getDataButton, stepButton, counterDisplay model ]
+                , row [ spacing 8 ] [ getDataButton, counterDisplay model ]
                 , inputBeta model
                 ]
             , el [ Font.size 14, centerX ] (text "Run with 0 < beta < 1.0")
             , el [ Font.size 14 ] (text model.message)
             ]
         ]
+
+
+renderHeatMap : Model -> Element Msg
+renderHeatMap model =
+    case model.heatMap of
+        Nothing -> Element.none
+        Just heatMap -> el [] (HeatMap.renderAsHtml heatMap |> Element.html)
 
 
 counterDisplay : Model -> Element Msg
@@ -216,14 +230,8 @@ inputBeta model =
         }
 
 
-stepButton : Element Msg
-stepButton =
-    row [ centerX ]
-        [ Input.button buttonStyle
-            { onPress = Just Step
-            , label = el [ centerX, centerY ] (text "Step")
-            }
-        ]
+
+
 
 
 getDataButton : Element Msg
@@ -231,7 +239,7 @@ getDataButton =
     row [ centerX ]
         [ Input.button buttonStyle
             { onPress = Just GetData
-            , label = el [ centerX, centerY ] (text "Get data")
+            , label = el [ centerX, centerY ] (text "Step")
             }
         ]
 
