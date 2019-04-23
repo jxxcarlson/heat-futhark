@@ -73,16 +73,19 @@ indices (HeatMap ( nRows, nCols ) _) =
 renderAsHtml : HeatMap -> Html msg
 renderAsHtml heatMap =
     let
+
+        nPixels = 500
+
         ( nr, nc ) =
             dimensions heatMap
 
         cellSize =
-            400 / (toFloat nr)
+            nPixels / (toFloat nr)
     in
         svg
-            [ SA.height <| String.fromFloat 400
-            , SA.width <| String.fromFloat 400
-            , SA.viewBox <| "0 0 400 400"
+            [ SA.height <| String.fromFloat nPixels
+            , SA.width <| String.fromFloat nPixels
+            , SA.viewBox <| "0 0 " ++ (String.fromInt nPixels) ++ " " ++ (String.fromInt nPixels)
             ]
             [ renderAsSvg cellSize heatMap ]
 

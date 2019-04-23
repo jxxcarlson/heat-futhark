@@ -120,6 +120,9 @@ class Data():
   def set_beta(self, beta):
       self.beta = beta
 
+  def set_n(self, n):
+      self.n = n
+
 
 myData = Data(20)
 
@@ -150,7 +153,8 @@ def send():
 def step(n_iterations):
     myData.iterations = int(n_iterations)
     myData.step()
-    return myData.state.reshape(1,n*n).get()[0].tobytes()
+    nn = myData.n * myData.n
+    return myData.state.reshape(1,nn).get()[0].tobytes()
 
 
 def reset():
@@ -172,6 +176,9 @@ def beta(beta):
     myData.set_beta(float(beta))
     return "beta = " + beta
 
+def do_set_n(n):
+    myData.set_n(int(n))
+    return "n = " + n
 
 def defaultResponse():
     return "unknown command"
@@ -179,7 +186,8 @@ def defaultResponse():
 op = { 'step':  step,
        'data':  data,
        'reset': reset,
-       'beta': beta}
+       'beta': beta,
+       'n': do_set_n}
 
 
 def response(command_string):

@@ -45,7 +45,7 @@ type alias Model =
     , output : String
     , counter : Int
     , appState : AppState
-    , beta : Float
+    , nString : String
     , betaString : String
     , heatMapSize : Int
     , heatMap : Maybe HeatMap
@@ -66,6 +66,7 @@ type AppState
 type Msg
     = NoOp
     | InputBeta String
+    | InputN String
     | Tick Posix
     | AdvanceAppState
     | Reset
@@ -84,7 +85,7 @@ init flags =
       , output = "Test"
       , counter = 0
       , appState = Ready
-      , beta = 0.1
+      , nString = "20"
       , betaString = "0.1"
       , heatMapSize = 20
       , heatMap = Nothing
@@ -111,6 +112,14 @@ update msg model =
 
                 Just beta_ ->
                     ( { model | betaString = str }, serverCommand <| "beta=" ++ str )
+
+        InputN str ->
+            case String.toInt str of
+                Nothing ->
+                    ( { model | nString = str }, Cmd.none )
+
+                Just n_ ->
+                    ( { model | nString = str, heatMapSize = n_ }, serverCommand <| "n=" ++ str )
 
         Tick t ->
             case model.appState == Running of
@@ -206,6 +215,7 @@ mainColumn model =
                 , runButton model
                 , row [ spacing 8 ] [ getDataButton, counterDisplay model ]
                 , inputBeta model
+                , inputN model
                 ]
             , el [ Font.size 14, centerX ] (text "Run with 0 < beta < 1.0")
             , el [ Font.size 14 ] (text model.message)
@@ -247,6 +257,15 @@ inputBeta model =
         , text = model.betaString
         , placeholder = Nothing
         , label = Input.labelLeft [] <| el [ Font.size buttonFontSize, moveDown 12 ] (text "beta ")
+        }
+
+inputN : Model -> Element Msg
+inputN model =
+    Input.text [ width (px 60), Font.size buttonFontSize ]
+        { onChange = InputN
+        , text = model.nString
+        , placeholder = Nothing
+        , label = Input.labelLeft [] <| el [ Font.size buttonFontSize, moveDown 12 ] (text "N ")
         }
 
 
