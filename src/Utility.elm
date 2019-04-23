@@ -1,4 +1,9 @@
-module Utility exposing (decodeArray, test)
+module Utility exposing (decodeArray)
+
+{-| The decodeArray function decodes a Byte sequence
+into an array of floats, assuming that that is possible.
+
+-}
 
 import Bytes exposing (Endianness(..))
 import Bytes.Decode as Decode exposing (..)

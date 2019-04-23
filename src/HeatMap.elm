@@ -1,6 +1,11 @@
-module HeatMap exposing (HeatMap(..), location, index, cellAtIndex,  renderAsHtml)
+module HeatMap exposing (HeatMap(..), renderAsHtml)
+
+{-|  A HeatMap is in effect a 2D array of floats implemented
+as a flat array.  The main purpose of this module is
+to provide both SVG and HTML renditions of HeatMaps.
 
 
+-}
 
 import Array exposing (Array)
 import Svg exposing (Svg, svg, rect, g)

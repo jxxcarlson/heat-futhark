@@ -1,9 +1,10 @@
 module Main exposing (main)
 
-{- This is a starter app which presents a text label, text field, and a button.
-   What you enter in the text field is echoed in the label.  When you press the
-   button, the text in the label is reverse.
-   This version uses `mdgriffith/elm-ui` for the view functions.
+{- This app is a demo of how computationally intensive tasks, in this case appliction
+of the discrete heat kernel, can be offloaded to Futhark embedded in a Python server
+that talks to the Elm app.
+
+Still in a crude state/
 -}
 
 import Browser
