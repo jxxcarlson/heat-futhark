@@ -1,9 +1,19 @@
-module ArrayParser exposing (decodeArray)
+module ArrayParser exposing (decodeArray, byteArrayDecoder, dummyDecodeArray)
 
 import Parser exposing (..)
 import Array exposing (..)
+import Bytes exposing(Bytes)
+import Bytes.Decode exposing(Decoder)
 
 
+byteArrayDecoder : Decoder (Array Float)
+byteArrayDecoder  =
+    Bytes.Decode.succeed Array.empty
+
+
+dummyDecodeArray : Bytes -> Decoder (Array Float)
+dummyDecodeArray bytes =
+    Bytes.Decode.succeed  <| Array.fromList [0.0, 1.0, 2.0]
 
 decodeArray : String -> Maybe (Array (Array Float))
 decodeArray str =

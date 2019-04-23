@@ -77,18 +77,21 @@ heatKernel = heat.heat()
 # the test data will be received from the
 # client by HTTP.
 
-n = 30 # I'v tried n = 1000; works fine
+n = 6 # I'v tried n = 1000; works fine
 
-# data = np.zeros(n*n).reshape(n,n)
-# data[1,1]=1; data[2,2]=1;
-# data[3,3]=1; data[0,1]=1.0; data[0,2]=0.5
-# data[5,2]=1; data[5,3] = 1;data[5,4]=1;data[5,5]=1;
+data = np.zeros(n*n).reshape(n,n)
+# data[0,0] = 1;
+# data[0,1] = 2;
+# data[0,2] = 3;
+data[1,1]=1; data[2,2]=1;
+data[3,3]=1; data[0,1]=1.0; data[0,2]=0.5
+data[5,2]=1; data[5,3] = 1;data[5,4]=1;data[5,5]=1;
 
-data = np.random.rand(n,n)
+# data = np.random.rand(n,n)
 array = np.array(data, dtype=np.float32)
 
 
-# https://markhneedham.com/blog/2018/04/07/python-serialize-deserialize-numpy-2d-arrays/
+# `
 # byte_output = array.tobytes()
 # array_format = np.frombuffer(byte_output)
 
@@ -97,13 +100,12 @@ array = np.array(data, dtype=np.float32)
 class Data():
   def __init__(self):
         self.state = array
-        print array
+        self.count = 0
 
   def step(self):
         self.state = heatKernel.main(1, 0.5, self.state)
-        print len(self.state), len(self.state[0])
-        print type(self.state)
-        print self.state
+        self.count = self.count + 1
+
 
 
 myData = Data()
@@ -120,7 +122,19 @@ class S(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self._set_headers()
-        self.wfile.write(myData.state.reshape(1,n*n))
+        print "DATA"
+        if myData.count == 0:
+          dd = myData.state.reshape(1,n*n)[0]
+          print dd
+          dataToSend = dd.tobytes()
+        else:
+          dd = myData.state.reshape(1,n*n).get()[0]
+          print dd
+          dataToSend = dd.tobytes()
+        print type(dataToSend)
+        print len(dataToSend)
+        self.wfile.write(dataToSend)
+
         myData.step()
 
     def do_HEAD(self):

@@ -17,7 +17,11 @@ import Time exposing (Posix)
 import Configuration
 import Http
 import Array exposing(Array)
-import ArrayParser
+import Utility
+import Hex
+import Bytes exposing(Bytes, Endianness(..))
+import Bytes.Decode
+
 
 
 tickInterval : Float
@@ -65,7 +69,7 @@ type Msg
     | AdvanceAppState
     | Reset
     | GetData
-    | GotData (Result Http.Error String)
+    | GotData (Result Http.Error Bytes)
 
 
 type alias Flags =
@@ -80,7 +84,7 @@ init flags =
       , appState = Ready
       , beta = 0.1
       , betaString = "0.1"
-      , heatMapSize = 30
+      , heatMapSize = 6
       , heatMap = Nothing
       , message = ""
       }
@@ -133,22 +137,26 @@ update msg model =
             ( { model | counter = 0, appState = Ready, heatMap = Nothing }, Cmd.none )
 
         GetData ->
-            ( { model | message = "Getting data" }, getData )
+            ( { model | message = "Getting data" }, (getData <| 144))
+            --  4*model.heatMapSize*model.heatMapSize
 
-        GotData (Ok str) ->
-            case ArrayParser.decodeArray str of
+        GotData (Ok bytes) ->
+            let
+                _ = Debug.log "HEX:" (Hex.fromBytes bytes)
+                _ = Debug.log "Width" (Bytes.width bytes)
+                n_ = model.heatMapSize * model.heatMapSize
+            in
+            case Bytes.Decode.decode (Utility.decodeArray n_ (Bytes.Decode.float32 LE)) bytes of
                  Nothing -> ( { model | message = "Could not decode data from server"} , Cmd.none)
                  Just array ->
                      let
                         n = model.heatMapSize
-                        row = Array.get 0 array |> Maybe.withDefault Array.empty
                       in
-                        ( { model | message = "Got data",  heatMap = Just <| HeatMap (n,n) row}, Cmd.none )
+                        ( { model | message = "Got data",  heatMap = Just <| HeatMap (n,n) array}, Cmd.none )
 
 
         GotData (Err err) ->
             ( { model | message = "Error getting data", heatMap  = Nothing}, Cmd.none )
-
 
 
 --
@@ -156,11 +164,11 @@ update msg model =
 --
 
 
-getData : Cmd Msg
-getData =
+getData : Int -> Cmd Msg
+getData nBytes =
     Http.get
         { url = Configuration.host
-        , expect = Http.expectString GotData
+        , expect = Http.expectBytes GotData (Bytes.Decode.bytes nBytes)
         }
 
 
