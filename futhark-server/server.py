@@ -73,28 +73,6 @@ import heat # import heat.py
 
 heatKernel = heat.heat()
 
-# Set up test data.  In future version,
-# the test data will be received from the
-# client by HTTP.
-
-n = 20 # I've tried n = 1000; works fine
-
-# data = np.zeros(n*n).reshape(n,n)
-# # data[0,0] = 1;
-# # data[0,1] = 2;
-# # data[0,2] = 3;
-# data[1,1]=1; data[2,2]=1;
-# data[3,3]=1; data[0,1]=1.0; data[0,2]=0.5
-# data[5,2]=1; data[5,3] = 1;data[5,4]=1;data[5,5]=1;
-#
-# data = np.random.rand(n,n)
-# array = np.array(data, dtype=np.float32)
-#
-
-# `
-# byte_output = array.tobytes()
-# array_format = np.frombuffer(byte_output)
-
 
 # The class which manages state
 class Data():
@@ -135,20 +113,6 @@ def parse(str):
         return { 'cmd': parts[0], 'arg': parts[1], 'arity': 1}
     else:
         return { 'cmd': parts[0], 'arg': "", 'arity': 0}
-
-
-
-def send():
-    if myData.count == 0:
-        dd = myData.state.reshape(1,n*n)[0]
-        print dd
-        return dd.tobytes()
-    else:
-        dd = myData.state.reshape(1,n*n).get()[0]
-        print dd
-        return dd.tobytes()
-    print type(dataToSend)
-    print len(dataToSend)
 
 def step(n_iterations):
     myData.iterations = int(n_iterations)
