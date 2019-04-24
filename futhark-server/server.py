@@ -87,11 +87,18 @@ class Data():
 
 
   def step(self):
+        print "STEP, iterations = "  + str(self.iterations)
         self.state = heatKernel.main(self.iterations,self.beta, self.state)
         self.count = self.count + 1
 
   def reset(self):
       data = np.random.rand(self.n,self.n)
+      for i in range(self.n//2, 4*self.n//5):
+          for j in range(self.n//2, 4*self.n//5):
+              data[i,j] = 0
+      for i in range(self.n//5, 2*self.n/5):
+          for j in range(self.n//5, 2*self.n//5):
+              data[i,j] = 1.0
       array = np.array(data, dtype=np.float32)
       self.state = array
 
@@ -100,6 +107,10 @@ class Data():
 
   def set_n(self, n):
       self.n = n
+
+  def set_iterations(self, n):
+    self.iterations = n
+    print ("In set_iterations (X), iterations = " + str(self.iterations))
 
 
 myData = Data(20)
@@ -144,6 +155,11 @@ def do_set_n(n):
     myData.set_n(int(n))
     return "n = " + n
 
+def do_set_iterations(n):
+    print ("In do_set_iterations, n = " + n)
+    myData.set_iterations(int(n))
+    return "iterations = " + n
+
 def defaultResponse():
     return "unknown command"
 
@@ -151,7 +167,8 @@ op = { 'step':  step,
        'data':  data,
        'reset': reset,
        'beta': beta,
-       'n': do_set_n}
+       'n': do_set_n,
+       'iterations': do_set_iterations}
 
 
 def response(command_string):
