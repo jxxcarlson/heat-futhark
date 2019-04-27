@@ -108,12 +108,12 @@ class Data():
         print "STEP, iterations = "  + str(self.iterations)
         start = time.time()
         (self.state, self.png) = heatKernel.main(self.iterations,self.beta, self.state)
-        # print self.png.get().astype(np.uint8)
-        # print type(self.png.get().astype(np.uint8))
-        # outfile = "heat_image_" + str(self.count) + ".png"
-        # misc.imsave(outfile, self.png.get().astype(np.uint8))
         end = time.time()
         print 1000*(end - start)
+        # print self.png.get().astype(np.uint8)
+        # print type(self.png.get().astype(np.uint8))
+        outfile = "heat_image_" + str(self.count) + ".png"
+        misc.imsave(outfile, self.png.get().astype(np.uint8))
         self.count = self.count + 1
 
   def reset(self):
