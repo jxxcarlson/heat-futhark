@@ -9,3 +9,6 @@ make.sh
 futhark-server/_heat.c
 futhark-server/_heat.o
 futhark-server/_heat.so
+futhark-server/heat.h
+futhark-server/heat.c
+futhark-server/heat.py

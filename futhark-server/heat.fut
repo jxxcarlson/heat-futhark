@@ -41,10 +41,12 @@ let newField [rows][cols]
 
 type pngElement = [4]u8
 
-let pngRedData [rows][cols] (data: [rows][cols]f32): [rows][cols]pngElement =
-  map (map (\value -> [(u8.f32 (255*value)):u8, 0:u8, 0:u8, 255:u8])) data
+let f x = u8.f32 (255*x)
 
--- f32.u8 255*value
+let ff x = [f x, 0, 0]:[3]u8
+
+let pngRed [m][n] (data: [m][n]f32): [m][]u8 =
+  map (\row -> map ff row |> flatten) data
 
 let translate [rows][cols] (c: f32) (data: [rows][cols]f32): [rows][cols]f32 =
     map (map (\value -> value + c)) data
@@ -58,6 +60,7 @@ let rescale [rows][cols] (c: f32) (data: [rows][cols]f32): [rows][cols]f32 =
 --   [9]> main 1 0.5 data
 --       [[0.0f32, 0.0f32, 0.0f32], [0.0f32, 0.5f32, 0.0f32], [0.0f32, 0.0f32, 0.0f32]]
 let main [rows][cols]
-         (iterations: i32) (beta: f32) (field: [rows][cols]f32): [rows][cols]f32 =
+         (iterations: i32) (beta: f32) (field: [rows][cols]f32): ([rows][cols]f32, [rows][]u8) =
   let field = loop field for _i < iterations do newField beta field
-  in field
+  let pngData = pngRed field
+  in (field, pngData)

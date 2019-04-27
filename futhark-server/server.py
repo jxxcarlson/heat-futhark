@@ -64,8 +64,10 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import os
 import json
 import numpy as np
+from scipy import misc
 import png
 import heat # import heat.py
+import time
 
 png.from_array([[255, 0, 0, 255],
                 [0, 255, 255, 0]], 'L').save("small_smiley.png")
@@ -91,16 +93,27 @@ class Data():
         data = np.random.rand(n,n)
         array = np.array(data, dtype=np.float32)
         self.state = array
+        self.png = []
         self.count = 0
         self.iterations = 1
         self.beta = 0.1
 
   ## def save(self):
 
+  # n = 1000, t = 4 ms
+  # n = 2000, t = 14 ms (x 3.5)
+  # n = 4000, t = 50 ms (x 3.57)
+
   def step(self):
         print "STEP, iterations = "  + str(self.iterations)
-        self.state = heatKernel.main(self.iterations,self.beta, self.state)
-        # png.from_array(self.png, 'L').save("heat_image" + str(self.count) + ".png")
+        start = time.time()
+        (self.state, self.png) = heatKernel.main(self.iterations,self.beta, self.state)
+        # print self.png.get().astype(np.uint8)
+        # print type(self.png.get().astype(np.uint8))
+        # outfile = "heat_image_" + str(self.count) + ".png"
+        # misc.imsave(outfile, self.png.get().astype(np.uint8))
+        end = time.time()
+        print 1000*(end - start)
         self.count = self.count + 1
 
   def reset(self):
@@ -142,7 +155,6 @@ def step(n_iterations):
     myData.step()
     nn = myData.n * myData.n
     return myData.state.reshape(1,nn).get()[0].tobytes()
-
 
 def reset():
     myData.reset()
@@ -205,8 +217,11 @@ class S(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        start = time.time()
         self._set_headers()
         self.wfile.write(response(self.path))
+        end = time.time()
+        print 1000*(end - start)
 
     def do_HEAD(self):
         self._set_headers()
