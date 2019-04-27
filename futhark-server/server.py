@@ -64,7 +64,17 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import os
 import json
 import numpy as np
+import png
 import heat # import heat.py
+
+png.from_array([[255, 0, 0, 255],
+                [0, 255, 255, 0]], 'L').save("small_smiley.png")
+
+f = open('ramp.png', 'wb')      # binary mode is important
+w = png.Writer(256, 1, greyscale=True)
+w.write(f, [range(256)])
+f.close()
+
 
 #### MANIPULATE DATA USING FUTHARK ####
 
@@ -85,10 +95,12 @@ class Data():
         self.iterations = 1
         self.beta = 0.1
 
+  ## def save(self):
 
   def step(self):
         print "STEP, iterations = "  + str(self.iterations)
         self.state = heatKernel.main(self.iterations,self.beta, self.state)
+        # png.from_array(self.png, 'L').save("heat_image" + str(self.count) + ".png")
         self.count = self.count + 1
 
   def reset(self):

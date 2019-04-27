@@ -1024,106 +1024,106 @@ static inline float futrts_from_bits32(int32_t x)
     p.f = x;
     return p.t;
 }
-__kernel void map_4695(int32_t sizze_4609, float beta_4611,
-                       int32_t range_end_4614, int32_t num_elems_4617,
-                       int32_t range_end_4619, int32_t num_elems_4622, __global
-                       unsigned char *field_mem_4752, __global
-                       unsigned char *mem_4756)
+__kernel void map_4735(int32_t sizze_4649, float beta_4651,
+                       int32_t range_end_4654, int32_t num_elems_4657,
+                       int32_t range_end_4659, int32_t num_elems_4662, __global
+                       unsigned char *field_mem_4792, __global
+                       unsigned char *mem_4796)
 {
     const int block_dim0 = 0;
     const int block_dim1 = 1;
     const int block_dim2 = 2;
-    int32_t wave_sizze_4772;
-    int32_t group_sizze_4773;
-    int32_t gtid_4686;
-    int32_t gtid_4687;
-    int32_t global_tid_4695;
-    int32_t local_tid_4696;
-    int32_t group_id_4697;
+    int32_t wave_sizze_4812;
+    int32_t group_sizze_4813;
+    int32_t gtid_4726;
+    int32_t gtid_4727;
+    int32_t global_tid_4735;
+    int32_t local_tid_4736;
+    int32_t group_id_4737;
     
-    global_tid_4695 = get_global_id(0);
-    local_tid_4696 = get_local_id(0);
-    group_sizze_4773 = get_local_size(0);
-    wave_sizze_4772 = LOCKSTEP_WIDTH;
-    group_id_4697 = get_group_id(0);
-    gtid_4686 = squot32(global_tid_4695, num_elems_4622);
-    gtid_4687 = global_tid_4695 - squot32(global_tid_4695, num_elems_4622) *
-        num_elems_4622;
+    global_tid_4735 = get_global_id(0);
+    local_tid_4736 = get_local_id(0);
+    group_sizze_4813 = get_local_size(0);
+    wave_sizze_4812 = LOCKSTEP_WIDTH;
+    group_id_4737 = get_group_id(0);
+    gtid_4726 = squot32(global_tid_4735, num_elems_4662);
+    gtid_4727 = global_tid_4735 - squot32(global_tid_4735, num_elems_4662) *
+        num_elems_4662;
     
-    bool binop_x_4746;
-    bool binop_y_4747;
-    bool index_primexp_4748;
-    bool res_4701;
-    bool x_4702;
-    bool res_4703;
-    bool x_4704;
-    float res_4705;
+    bool binop_x_4786;
+    bool binop_y_4787;
+    bool index_primexp_4788;
+    bool res_4741;
+    bool x_4742;
+    bool res_4743;
+    bool x_4744;
+    float res_4745;
     
-    if (slt32(gtid_4686, num_elems_4617) && slt32(gtid_4687, num_elems_4622)) {
-        binop_x_4746 = slt32(0, gtid_4686);
-        binop_y_4747 = slt32(gtid_4686, range_end_4614);
-        index_primexp_4748 = binop_x_4746 && binop_y_4747;
-        res_4701 = slt32(0, gtid_4687);
-        x_4702 = res_4701 && index_primexp_4748;
-        res_4703 = slt32(gtid_4687, range_end_4619);
-        x_4704 = x_4702 && res_4703;
-        if (x_4704) {
-            int32_t i_4706;
-            float x_4707;
-            int32_t i_4708;
-            float y_4709;
-            float x_4710;
-            int32_t i_4711;
-            float y_4712;
-            float x_4713;
-            int32_t i_4714;
-            float y_4715;
-            float res_4716;
-            float x_4717;
-            float y_4718;
-            float x_4719;
-            float y_4720;
-            float y_4721;
-            float res_4722;
+    if (slt32(gtid_4726, num_elems_4657) && slt32(gtid_4727, num_elems_4662)) {
+        binop_x_4786 = slt32(0, gtid_4726);
+        binop_y_4787 = slt32(gtid_4726, range_end_4654);
+        index_primexp_4788 = binop_x_4786 && binop_y_4787;
+        res_4741 = slt32(0, gtid_4727);
+        x_4742 = res_4741 && index_primexp_4788;
+        res_4743 = slt32(gtid_4727, range_end_4659);
+        x_4744 = x_4742 && res_4743;
+        if (x_4744) {
+            int32_t i_4746;
+            float x_4747;
+            int32_t i_4748;
+            float y_4749;
+            float x_4750;
+            int32_t i_4751;
+            float y_4752;
+            float x_4753;
+            int32_t i_4754;
+            float y_4755;
+            float res_4756;
+            float x_4757;
+            float y_4758;
+            float x_4759;
+            float y_4760;
+            float y_4761;
+            float res_4762;
             
-            i_4706 = gtid_4686 - 1;
-            x_4707 = *(__global float *) &field_mem_4752[(i_4706 * sizze_4609 +
-                                                          gtid_4687) * 4];
-            i_4708 = 1 + gtid_4686;
-            y_4709 = *(__global float *) &field_mem_4752[(i_4708 * sizze_4609 +
-                                                          gtid_4687) * 4];
-            x_4710 = x_4707 + y_4709;
-            i_4711 = gtid_4687 - 1;
-            y_4712 = *(__global float *) &field_mem_4752[(gtid_4686 *
-                                                          sizze_4609 + i_4711) *
+            i_4746 = gtid_4726 - 1;
+            x_4747 = *(__global float *) &field_mem_4792[(i_4746 * sizze_4649 +
+                                                          gtid_4727) * 4];
+            i_4748 = 1 + gtid_4726;
+            y_4749 = *(__global float *) &field_mem_4792[(i_4748 * sizze_4649 +
+                                                          gtid_4727) * 4];
+            x_4750 = x_4747 + y_4749;
+            i_4751 = gtid_4727 - 1;
+            y_4752 = *(__global float *) &field_mem_4792[(gtid_4726 *
+                                                          sizze_4649 + i_4751) *
                                                          4];
-            x_4713 = x_4710 + y_4712;
-            i_4714 = 1 + gtid_4687;
-            y_4715 = *(__global float *) &field_mem_4752[(gtid_4686 *
-                                                          sizze_4609 + i_4714) *
+            x_4753 = x_4750 + y_4752;
+            i_4754 = 1 + gtid_4727;
+            y_4755 = *(__global float *) &field_mem_4792[(gtid_4726 *
+                                                          sizze_4649 + i_4754) *
                                                          4];
-            res_4716 = x_4713 + y_4715;
-            x_4717 = 1.0F - beta_4611;
-            y_4718 = *(__global float *) &field_mem_4752[(gtid_4686 *
-                                                          sizze_4609 +
-                                                          gtid_4687) * 4];
-            x_4719 = x_4717 * y_4718;
-            y_4720 = res_4716 / 4.0F;
-            y_4721 = beta_4611 * y_4720;
-            res_4722 = x_4719 + y_4721;
-            res_4705 = res_4722;
+            res_4756 = x_4753 + y_4755;
+            x_4757 = 1.0F - beta_4651;
+            y_4758 = *(__global float *) &field_mem_4792[(gtid_4726 *
+                                                          sizze_4649 +
+                                                          gtid_4727) * 4];
+            x_4759 = x_4757 * y_4758;
+            y_4760 = res_4756 / 4.0F;
+            y_4761 = beta_4651 * y_4760;
+            res_4762 = x_4759 + y_4761;
+            res_4745 = res_4762;
         } else {
-            float res_4723 = *(__global float *) &field_mem_4752[(gtid_4686 *
-                                                                  sizze_4609 +
-                                                                  gtid_4687) *
+            float res_4763 = *(__global float *) &field_mem_4792[(gtid_4726 *
+                                                                  sizze_4649 +
+                                                                  gtid_4727) *
                                                                  4];
             
-            res_4705 = res_4723;
+            res_4745 = res_4763;
         }
     }
-    if (slt32(gtid_4686, num_elems_4617) && slt32(gtid_4687, num_elems_4622)) {
-        *(__global float *) &mem_4756[(gtid_4686 * num_elems_4622 + gtid_4687) *
-                                      4] = res_4705;
+    if (slt32(gtid_4726, num_elems_4657) && slt32(gtid_4727, num_elems_4662)) {
+        *(__global float *) &mem_4796[(gtid_4726 * num_elems_4662 + gtid_4727) *
+                                      4] = res_4745;
     }
 }
 """
@@ -2217,145 +2217,145 @@ class heat:
                                        size_heuristics=size_heuristics,
                                        required_types=["i32", "f32", "bool"],
                                        user_sizes=sizes,
-                                       all_sizes={"main.group_size_4689": {"class": "group_size", "value": None}})
-    self.map_4695_var = program.map_4695
-  def futhark_main(self, field_mem_sizze_4749, field_mem_4750, sizze_4608,
-                   sizze_4609, iterations_4610, beta_4611):
-    loop_nonempty_4613 = slt32(np.int32(0), iterations_4610)
-    range_end_4614 = (sizze_4608 - np.int32(1))
-    bounds_invalid_upwards_4615 = slt32(range_end_4614, np.int32(0))
-    distance_4616 = (np.int32(1) + range_end_4614)
-    if bounds_invalid_upwards_4615:
-      num_elems_4617 = np.int32(0)
+                                       all_sizes={"main.group_size_4729": {"class": "group_size", "value": None}})
+    self.map_4735_var = program.map_4735
+  def futhark_main(self, field_mem_sizze_4789, field_mem_4790, sizze_4648,
+                   sizze_4649, iterations_4650, beta_4651):
+    loop_nonempty_4653 = slt32(np.int32(0), iterations_4650)
+    range_end_4654 = (sizze_4648 - np.int32(1))
+    bounds_invalid_upwards_4655 = slt32(range_end_4654, np.int32(0))
+    distance_4656 = (np.int32(1) + range_end_4654)
+    if bounds_invalid_upwards_4655:
+      num_elems_4657 = np.int32(0)
     else:
-      num_elems_4617 = distance_4616
-    range_end_4619 = (sizze_4609 - np.int32(1))
-    bounds_invalid_upwards_4620 = slt32(range_end_4619, np.int32(0))
-    distance_4621 = (np.int32(1) + range_end_4619)
-    if bounds_invalid_upwards_4620:
-      num_elems_4622 = np.int32(0)
+      num_elems_4657 = distance_4656
+    range_end_4659 = (sizze_4649 - np.int32(1))
+    bounds_invalid_upwards_4660 = slt32(range_end_4659, np.int32(0))
+    distance_4661 = (np.int32(1) + range_end_4659)
+    if bounds_invalid_upwards_4660:
+      num_elems_4662 = np.int32(0)
     else:
-      num_elems_4622 = distance_4621
-    not_p_4625 = not(bounds_invalid_upwards_4615)
-    not_p_4629 = not(bounds_invalid_upwards_4620)
-    old_empty_4632 = (bounds_invalid_upwards_4615 or bounds_invalid_upwards_4620)
-    dim_zzero_4633 = (np.int32(0) == sizze_4608)
-    dim_zzero_4634 = (np.int32(0) == sizze_4609)
-    new_empty_4635 = (dim_zzero_4633 or dim_zzero_4634)
-    both_empty_4636 = (old_empty_4632 and new_empty_4635)
-    eq_x_y_4637 = (sizze_4608 == np.int32(0))
-    p_and_eq_x_y_4639 = (bounds_invalid_upwards_4615 and eq_x_y_4637)
-    dim_match_4641 = (not_p_4625 or p_and_eq_x_y_4639)
-    eq_x_y_4642 = (sizze_4609 == np.int32(0))
-    p_and_eq_x_y_4644 = (bounds_invalid_upwards_4620 and eq_x_y_4642)
-    dim_match_4646 = (not_p_4629 or p_and_eq_x_y_4644)
-    match_4647 = (dim_match_4641 and dim_match_4646)
-    empty_or_match_4648 = (both_empty_4636 or match_4647)
-    empty_or_match_cert_4649 = True
-    if loop_nonempty_4613:
-      x_4650 = True
-      assert empty_or_match_4648, ("Error at heat.fut:46:1-49:10 -> heat.fut:48:49-67 -> heat.fut:30:1-39:18: %s%s%d%s%s%d%s%s" % ("Function return value does not match shape of type ",
+      num_elems_4662 = distance_4661
+    not_p_4665 = not(bounds_invalid_upwards_4655)
+    not_p_4669 = not(bounds_invalid_upwards_4660)
+    old_empty_4672 = (bounds_invalid_upwards_4655 or bounds_invalid_upwards_4660)
+    dim_zzero_4673 = (np.int32(0) == sizze_4648)
+    dim_zzero_4674 = (np.int32(0) == sizze_4649)
+    new_empty_4675 = (dim_zzero_4673 or dim_zzero_4674)
+    both_empty_4676 = (old_empty_4672 and new_empty_4675)
+    eq_x_y_4677 = (sizze_4648 == np.int32(0))
+    p_and_eq_x_y_4679 = (bounds_invalid_upwards_4655 and eq_x_y_4677)
+    dim_match_4681 = (not_p_4665 or p_and_eq_x_y_4679)
+    eq_x_y_4682 = (sizze_4649 == np.int32(0))
+    p_and_eq_x_y_4684 = (bounds_invalid_upwards_4660 and eq_x_y_4682)
+    dim_match_4686 = (not_p_4669 or p_and_eq_x_y_4684)
+    match_4687 = (dim_match_4681 and dim_match_4686)
+    empty_or_match_4688 = (both_empty_4676 or match_4687)
+    empty_or_match_cert_4689 = True
+    if loop_nonempty_4653:
+      x_4690 = True
+      assert empty_or_match_4688, ("Error at heat.fut:60:1-63:10 -> heat.fut:62:49-67 -> heat.fut:30:1-39:18: %s%s%d%s%s%d%s%s" % ("Function return value does not match shape of type ",
                                                                                                                                    "[",
-                                                                                                                                   sizze_4608,
+                                                                                                                                   sizze_4648,
                                                                                                                                    "]",
                                                                                                                                    "[",
-                                                                                                                                   sizze_4609,
+                                                                                                                                   sizze_4649,
                                                                                                                                    "]",
                                                                                                                                    "intrinsics.f32"))
-      empty_or_match_cert_4649 = x_4650
+      empty_or_match_cert_4689 = x_4690
     else:
-      empty_or_match_cert_4649 = True
-    nesting_sizze_4688 = (num_elems_4617 * num_elems_4622)
-    group_sizze_4690 = self.sizes["main.group_size_4689"]
-    y_4691 = (group_sizze_4690 - np.int32(1))
-    x_4692 = (nesting_sizze_4688 + y_4691)
-    if loop_nonempty_4613:
-      x_4744 = squot32(x_4692, group_sizze_4690)
-      num_groups_4693 = x_4744
+      empty_or_match_cert_4689 = True
+    nesting_sizze_4728 = (num_elems_4657 * num_elems_4662)
+    group_sizze_4730 = self.sizes["main.group_size_4729"]
+    y_4731 = (group_sizze_4730 - np.int32(1))
+    x_4732 = (nesting_sizze_4728 + y_4731)
+    if loop_nonempty_4653:
+      x_4784 = squot32(x_4732, group_sizze_4730)
+      num_groups_4733 = x_4784
     else:
-      num_groups_4693 = np.int32(0)
-    num_threads_4694 = (group_sizze_4690 * num_groups_4693)
-    binop_x_4755 = sext_i32_i64(nesting_sizze_4688)
-    bytes_4753 = (np.int64(4) * binop_x_4755)
-    mem_4756 = opencl_alloc(self, bytes_4753, "mem_4756")
-    convop_x_4758 = (sizze_4608 * sizze_4609)
-    binop_x_4759 = sext_i32_i64(convop_x_4758)
-    bytes_4757 = (np.int64(4) * binop_x_4759)
-    field_mem_sizze_4751 = field_mem_sizze_4749
-    field_mem_4752 = field_mem_4750
-    _i_4653 = np.int32(0)
-    one_4775 = np.int32(1)
-    for counter_4774 in range(iterations_4610):
-      if ((1 * (np.long(num_groups_4693) * np.long(group_sizze_4690))) != 0):
-        self.map_4695_var.set_args(np.int32(sizze_4609), np.float32(beta_4611),
-                                   np.int32(range_end_4614),
-                                   np.int32(num_elems_4617),
-                                   np.int32(range_end_4619),
-                                   np.int32(num_elems_4622), field_mem_4752,
-                                   mem_4756)
-        cl.enqueue_nd_range_kernel(self.queue, self.map_4695_var,
-                                   ((np.long(num_groups_4693) * np.long(group_sizze_4690)),),
-                                   (np.long(group_sizze_4690),))
+      num_groups_4733 = np.int32(0)
+    num_threads_4734 = (group_sizze_4730 * num_groups_4733)
+    binop_x_4795 = sext_i32_i64(nesting_sizze_4728)
+    bytes_4793 = (np.int64(4) * binop_x_4795)
+    mem_4796 = opencl_alloc(self, bytes_4793, "mem_4796")
+    convop_x_4798 = (sizze_4648 * sizze_4649)
+    binop_x_4799 = sext_i32_i64(convop_x_4798)
+    bytes_4797 = (np.int64(4) * binop_x_4799)
+    field_mem_sizze_4791 = field_mem_sizze_4789
+    field_mem_4792 = field_mem_4790
+    _i_4693 = np.int32(0)
+    one_4815 = np.int32(1)
+    for counter_4814 in range(iterations_4650):
+      if ((1 * (np.long(num_groups_4733) * np.long(group_sizze_4730))) != 0):
+        self.map_4735_var.set_args(np.int32(sizze_4649), np.float32(beta_4651),
+                                   np.int32(range_end_4654),
+                                   np.int32(num_elems_4657),
+                                   np.int32(range_end_4659),
+                                   np.int32(num_elems_4662), field_mem_4792,
+                                   mem_4796)
+        cl.enqueue_nd_range_kernel(self.queue, self.map_4735_var,
+                                   ((np.long(num_groups_4733) * np.long(group_sizze_4730)),),
+                                   (np.long(group_sizze_4730),))
         if synchronous:
           self.queue.finish()
-      mem_4760 = opencl_alloc(self, bytes_4757, "mem_4760")
-      if (((sizze_4608 * sizze_4609) * np.int32(4)) != 0):
-        cl.enqueue_copy(self.queue, mem_4760, mem_4756,
+      mem_4800 = opencl_alloc(self, bytes_4797, "mem_4800")
+      if (((sizze_4648 * sizze_4649) * np.int32(4)) != 0):
+        cl.enqueue_copy(self.queue, mem_4800, mem_4796,
                         dest_offset=np.long(np.int32(0)),
                         src_offset=np.long(np.int32(0)),
-                        byte_count=np.long(((sizze_4608 * sizze_4609) * np.int32(4))))
+                        byte_count=np.long(((sizze_4648 * sizze_4649) * np.int32(4))))
       if synchronous:
         self.queue.finish()
-      field_mem_sizze_tmp_4769 = bytes_4757
-      field_mem_tmp_4770 = mem_4760
-      field_mem_sizze_4751 = field_mem_sizze_tmp_4769
-      field_mem_4752 = field_mem_tmp_4770
-      _i_4653 += one_4775
-    res_mem_sizze_4762 = field_mem_sizze_4751
-    res_mem_4763 = field_mem_4752
-    mem_4756 = None
-    out_arrsizze_4767 = sizze_4608
-    out_arrsizze_4768 = sizze_4609
-    out_memsizze_4766 = res_mem_sizze_4762
-    out_mem_4765 = res_mem_4763
-    return (out_memsizze_4766, out_mem_4765, out_arrsizze_4767,
-            out_arrsizze_4768)
-  def main(self, iterations_4610_ext, beta_4611_ext, field_mem_4750_ext):
+      field_mem_sizze_tmp_4809 = bytes_4797
+      field_mem_tmp_4810 = mem_4800
+      field_mem_sizze_4791 = field_mem_sizze_tmp_4809
+      field_mem_4792 = field_mem_tmp_4810
+      _i_4693 += one_4815
+    res_mem_sizze_4802 = field_mem_sizze_4791
+    res_mem_4803 = field_mem_4792
+    mem_4796 = None
+    out_arrsizze_4807 = sizze_4648
+    out_arrsizze_4808 = sizze_4649
+    out_memsizze_4806 = res_mem_sizze_4802
+    out_mem_4805 = res_mem_4803
+    return (out_memsizze_4806, out_mem_4805, out_arrsizze_4807,
+            out_arrsizze_4808)
+  def main(self, iterations_4650_ext, beta_4651_ext, field_mem_4790_ext):
     try:
-      iterations_4610 = np.int32(ct.c_int32(iterations_4610_ext))
+      iterations_4650 = np.int32(ct.c_int32(iterations_4650_ext))
     except (TypeError, AssertionError) as e:
       raise TypeError("Argument #0 has invalid value\nFuthark type: {}\nArgument has Python type {} and value: {}\n".format("i32",
-                                                                                                                            type(iterations_4610_ext),
-                                                                                                                            iterations_4610_ext))
+                                                                                                                            type(iterations_4650_ext),
+                                                                                                                            iterations_4650_ext))
     try:
-      beta_4611 = np.float32(ct.c_float(beta_4611_ext))
+      beta_4651 = np.float32(ct.c_float(beta_4651_ext))
     except (TypeError, AssertionError) as e:
       raise TypeError("Argument #1 has invalid value\nFuthark type: {}\nArgument has Python type {} and value: {}\n".format("f32",
-                                                                                                                            type(beta_4611_ext),
-                                                                                                                            beta_4611_ext))
+                                                                                                                            type(beta_4651_ext),
+                                                                                                                            beta_4651_ext))
     try:
-      assert ((type(field_mem_4750_ext) in [np.ndarray,
-                                            cl.array.Array]) and (field_mem_4750_ext.dtype == np.float32)), "Parameter has unexpected type"
-      sizze_4608 = np.int32(field_mem_4750_ext.shape[0])
-      sizze_4609 = np.int32(field_mem_4750_ext.shape[1])
-      field_mem_sizze_4749 = np.int64(field_mem_4750_ext.nbytes)
-      if (type(field_mem_4750_ext) == cl.array.Array):
-        field_mem_4750 = field_mem_4750_ext.data
+      assert ((type(field_mem_4790_ext) in [np.ndarray,
+                                            cl.array.Array]) and (field_mem_4790_ext.dtype == np.float32)), "Parameter has unexpected type"
+      sizze_4648 = np.int32(field_mem_4790_ext.shape[0])
+      sizze_4649 = np.int32(field_mem_4790_ext.shape[1])
+      field_mem_sizze_4789 = np.int64(field_mem_4790_ext.nbytes)
+      if (type(field_mem_4790_ext) == cl.array.Array):
+        field_mem_4790 = field_mem_4790_ext.data
       else:
-        field_mem_4750 = opencl_alloc(self, field_mem_sizze_4749,
-                                      "field_mem_4750")
-        if (field_mem_sizze_4749 != 0):
-          cl.enqueue_copy(self.queue, field_mem_4750,
-                          normaliseArray(field_mem_4750_ext),
+        field_mem_4790 = opencl_alloc(self, field_mem_sizze_4789,
+                                      "field_mem_4790")
+        if (field_mem_sizze_4789 != 0):
+          cl.enqueue_copy(self.queue, field_mem_4790,
+                          normaliseArray(field_mem_4790_ext),
                           is_blocking=synchronous)
     except (TypeError, AssertionError) as e:
       raise TypeError("Argument #2 has invalid value\nFuthark type: {}\nArgument has Python type {} and value: {}\n".format("[][]f32",
-                                                                                                                            type(field_mem_4750_ext),
-                                                                                                                            field_mem_4750_ext))
-    (out_memsizze_4766, out_mem_4765, out_arrsizze_4767,
-     out_arrsizze_4768) = self.futhark_main(field_mem_sizze_4749,
-                                            field_mem_4750, sizze_4608,
-                                            sizze_4609, iterations_4610,
-                                            beta_4611)
-    return cl.array.Array(self.queue, (out_arrsizze_4767, out_arrsizze_4768),
-                          ct.c_float, data=out_mem_4765)
+                                                                                                                            type(field_mem_4790_ext),
+                                                                                                                            field_mem_4790_ext))
+    (out_memsizze_4806, out_mem_4805, out_arrsizze_4807,
+     out_arrsizze_4808) = self.futhark_main(field_mem_sizze_4789,
+                                            field_mem_4790, sizze_4648,
+                                            sizze_4649, iterations_4650,
+                                            beta_4651)
+    return cl.array.Array(self.queue, (out_arrsizze_4807, out_arrsizze_4808),
+                          ct.c_float, data=out_mem_4805)

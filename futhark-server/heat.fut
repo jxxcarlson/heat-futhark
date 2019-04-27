@@ -38,6 +38,20 @@ let newField [rows][cols]
             (0...cols-1))
       (0...rows-1)
 
+
+type pngElement = [4]u8
+
+let pngRedData [rows][cols] (data: [rows][cols]f32): [rows][cols]pngElement =
+  map (map (\value -> [(u8.f32 (255*value)):u8, 0:u8, 0:u8, 255:u8])) data
+
+-- f32.u8 255*value
+
+let translate [rows][cols] (c: f32) (data: [rows][cols]f32): [rows][cols]f32 =
+    map (map (\value -> value + c)) data
+
+let rescale [rows][cols] (c: f32) (data: [rows][cols]f32): [rows][cols]f32 =
+    map (map (\value -> c*value)) data
+
 -- Perform the specified number of updates om the given temperature field.
 --   SIMPLEST TEST:
 --   [8]> let data = [[0, 0, 0], [0, 1, 0], [0, 0, 0]]:[3][3]f32
