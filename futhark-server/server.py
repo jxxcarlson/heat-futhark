@@ -61,8 +61,7 @@ Send a POST request::
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-import os
-import json
+import glob, os, os.path
 import numpy as np
 from scipy import misc
 import png
@@ -72,13 +71,13 @@ import time
 def round_to(k, x):
     return round(x*(10**k))/(10**k)
 
-png.from_array([[255, 0, 0, 255],
-                [0, 255, 255, 0]], 'L').save("small_smiley.png")
-
-f = open('ramp.png', 'wb')      # binary mode is important
-w = png.Writer(256, 1, greyscale=True)
-w.write(f, [range(256)])
-f.close()
+# png.from_array([[255, 0, 0, 255],
+#                 [0, 255, 255, 0]], 'L').save("small_smiley.png")
+#
+# f = open('ramp.png', 'wb')      # binary mode is important
+# w = png.Writer(256, 1, greyscale=True)
+# w.write(f, [range(256)])
+# f.close()
 
 
 #### MANIPULATE DATA USING FUTHARK ####
@@ -121,9 +120,12 @@ class Data():
         print "gpu: " + str(round_to(2,1000*(end - start)))
         # print self.png.get().astype(np.uint8)
         # print type(self.png.get().astype(np.uint8))
-        outfile = "heat_image" + str(self.count) + ".png"
+        outfile = "image/heat_image" + str(self.count) + ".png"
         misc.imsave(outfile, self.png.get().astype(np.uint8))
-        self.count = self.count + 1
+
+  def play(self):
+      print "PLAY"
+
 
   def reset(self):
       data = np.random.rand(self.n,self.n)
@@ -135,7 +137,13 @@ class Data():
               data[i,j] = 1.0
       array = np.array(data, dtype=np.float32)
       self.state = array
+      (self.state, self.png) = heatKernel.main(1,0, self.state)
+      outfile = "./image/heat_image0.png"
+      misc.imsave(outfile, self.png.get().astype(np.uint8))
       self.count = 0
+      print "beta = " + str(self.beta) + ", iterations = " + str(self.iterations)
+
+
 
   def set_beta(self, beta):
       self.beta = beta
@@ -160,18 +168,24 @@ def parse(str):
     else:
         return { 'cmd': parts[0], 'arg': "", 'arity': 0}
 
-def step(n_iterations):
-    myData.iterations = int(n_iterations)
+def step(count):
+    myData.count = int(count)
     myData.step()
-    nn = myData.n * myData.n
-    # return myData.state.reshape(1,nn).get()[0].tobytes()
-    # return myData.png.get().astype(np.uint8).tobytes()
+    return "image: " + str(myData.count)
+
+def play(count):
+    myData.count = int(count)
+    myData.play()
     return "image: " + str(myData.count)
 
 def reset():
+    filelist = glob.glob(os.path.join("./image", "*.png"))
+    for f in filelist:
+        os.remove(f)
+
     myData.reset()
-    nn = myData.n * myData.n
-    return myData.state.reshape(1,nn).tobytes()
+    return "server: reset"
+
 
 def data():
     nn = myData.n * myData.n
@@ -218,7 +232,10 @@ def response(command_string):
            print "cmd = " + c['cmd'] + ", arg = " + c['arg']
            return op[c['cmd']](c['arg'])
     else:
-        with open("./" + c['cmd'] , "rb") as binaryfile :
+        file_path = c['cmd']
+        while  !(os. path. isfile(file_path)):
+            time.sleep(0.05)
+        with open(file_path , "rb") as binaryfile :
            myArr = bytearray(binaryfile.read())
            print "length(myArr) = " + str(len(myArr))
            return myArr # defaultResponse()

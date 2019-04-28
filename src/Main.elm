@@ -26,7 +26,7 @@ import Bytes.Decode
 
 tickInterval : Float
 tickInterval =
-    333
+    500
 
 
 main =
@@ -57,6 +57,7 @@ type alias Model =
 type AppState
     = Ready
     | Running
+    | Playing
     | Paused
 
 
@@ -131,11 +132,15 @@ update msg model =
                     ( { model | iterationsString = str }, serverCommand <| "iterations=" ++ str )
 
         Tick t ->
-            case model.appState == Running of
-                True ->
-                    ( { model | counter = model.counter + 1 }, serverCommand <| "step=" ++ model.iterationsString )
+            case model.appState of
+                Running ->
+                    ( { model | counter = model.counter + 1 }, serverCommand <| "step=" ++ String.fromInt (model.counter + 1) )
 
-                False ->
+                Playing ->
+
+                    ( { model | counter = model.counter + 1 }, Cmd.none )
+
+                _ ->
                     ( model, Cmd.none )
 
         AdvanceAppState ->
@@ -150,6 +155,8 @@ update msg model =
 
                         Paused ->
                             Running
+
+                        Playing -> Playing
             in
                 ( { model | appState = nextAppState }, Cmd.none )
 
@@ -157,7 +164,7 @@ update msg model =
             ( { model | counter = 0, appState = Ready }, serverCommand "reset" )
 
         GetData ->
-            ( { model | message = "Getting data", counter = model.counter + 1 }, serverCommand <| "step=" ++ model.iterationsString )
+            ( { model | message = "Getting data", counter = model.counter + 1 }, serverCommand <| "step=" ++ String.fromInt (model.counter + 1) )
 
         GotData (Ok str) ->
             ({model | message = str}, Cmd.none)
@@ -222,7 +229,7 @@ mainColumn model =
                 , runButton model
                 , row [ spacing 8 ] [ getDataButton, counterDisplay model ]
                 , inputBeta model
-                , inputN model
+                -- , inputN model
                 ]
             , inputIterations model
             , el [ Font.size 14, centerX ] (text "Run with 0 < beta < 1.0")
@@ -235,14 +242,13 @@ renderHeatImage : Model -> Element Msg
 renderHeatImage model =
     let
         n = model.counter
-        url = "http://localhost:8001/heat_image" ++ (String.fromInt (max 0 (n - 2))) ++ ".png"
+        url = "http://localhost:8001/image/heat_image" ++ (String.fromInt (max 0 (n))) ++ ".png"
     in
       Keyed.el [] ( String.fromInt model.counter,
         column [spacing 10] [
-         Element.image [] {
+         Element.image [height (px 400)] {
              src = url
-           , description = url}
-         , el [Font.size 12] (text url)
+           , description = ""}
          ]
          )
 
@@ -346,22 +352,21 @@ resetButton model =
 
 resetLabel : AppState -> String
 resetLabel appState =
-    case appState of
-        Ready ->
-            "Set up"
+    "Reset"
 
-        _ ->
-            "Reset"
 
 
 appStateAsString : AppState -> String
 appStateAsString appState =
     case appState of
         Ready ->
-            "Run?"
+            "Run"
 
         Running ->
             "Running"
+
+        Playing ->
+            "Playing"
 
         Paused ->
             "Paused"
