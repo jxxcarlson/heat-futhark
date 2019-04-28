@@ -12,3 +12,4 @@ futhark-server/_heat.so
 futhark-server/heat.h
 futhark-server/heat.c
 futhark-server/heat.py
+futhark-server/image/*.png

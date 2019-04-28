@@ -15,15 +15,41 @@ The two images below demonstrate the operation of the app.  The first image disp
 
 The Futhark and server files are in `./futhark-server`.  The files for (the start of) the Elm client are in `./src`
 
-## Running the example
+## Running the example I
+
+There are now two examples, one in the `master` branch of the project, 
+the other in the `png` branch.
 
 Do the following in `./futhark-server/`
 
 ```
 $ futhark pyopencl --library heat.fut
 $ python server.py
+
+Next, in the root directory, to 
+
+``1
+$ elm make src/Main.elm
 ```
-Then go to http://localhost:8001. Each time you referesh the browser, data will be sent from the server and the `state` will be updated.
+
+Then open `index.html` to run the app.
+
+## Running Example II.
+
+Same procedure. Be sure to do `python server.py again`
+
+
+## Comparison of I and II.
+
+In both versions, the computation of the next temperature state
+is carried out by Futhark on the GPU.  In version I, the computed
+image is sent from the Python backend to the Elm front end as any array
+of floats. It is decoded by the front end and dsplayed as an SVG image.  Display 
+of the SVG image is the most time consuming part of the process by far.
+A 100x100 grid results in 10,000 cells, each of which gives rise to a 
+DOM node.  A 10,000 element DOM triee is already problematic; hence we
+explore other solutions. One is to create a PNG image on the back-end
+that represents the computed data.  This is the approach we explore in version II.
 
 ## Server.py
 
