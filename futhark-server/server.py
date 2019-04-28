@@ -209,6 +209,7 @@ op = { 'step':  step,
 
 def response(command_string):
     c = parse(command_string)
+    print "command = " + c['cmd']
     if c['cmd'] in op:
        if c['arity'] == 0:
            print "cmd = " + c['cmd']
@@ -217,7 +218,10 @@ def response(command_string):
            print "cmd = " + c['cmd'] + ", arg = " + c['arg']
            return op[c['cmd']](c['arg'])
     else:
-       return defaultResponse()
+        with open("./" + c['cmd'] , "rb") as binaryfile :
+           myArr = bytearray(binaryfile.read())
+           print "length(myArr) = " + str(len(myArr))
+           return myArr # defaultResponse()
 
 
 

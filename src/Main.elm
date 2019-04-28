@@ -235,7 +235,7 @@ renderHeatImage : Model -> Element Msg
 renderHeatImage model =
     let
         n = model.counter
-        url = "http://localhost:8002/heat_image" ++ (String.fromInt (max 0 (n - 2))) ++ ".png"
+        url = "http://localhost:8001/heat_image" ++ (String.fromInt (max 0 (n - 2))) ++ ".png"
     in
       Keyed.el [] ( String.fromInt model.counter,
         column [spacing 10] [
