@@ -66,6 +66,15 @@ here.
 
 PLANS: the next step is to write an Elm client that will talk to server.py and produce a visual display (heat map) of the data received.  See https://jxxcarlson.github.io/app/heat-model.html for a pure Elm version.  The Elm + Python + Futhark implementation will allow one to work with much larger heat fields (say, 100x100). All this is really a test for other models based on the state -> f(state) idea which are computationally more expensive. If there were a pure Elm bridge
  o Futhark, that would be awesome.
+ 
+ ## Installing Futhark
+ 
+ See the [Futhark User's Guide](https://futhark.readthedocs.io/en/latest/)
+ for installation instructions.  For example, on Mac OS, do
+ 
+```
+$ brew install futhark
+```
 
  ## Futhark repl
 
