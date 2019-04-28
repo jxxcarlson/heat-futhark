@@ -105,6 +105,7 @@ class Data():
         self.count = 0
         self.iterations = 1
         self.beta = 0.5
+        self.message = "starting ..."
 
   ## def save(self):
 
@@ -117,7 +118,8 @@ class Data():
         start = time.time()
         (self.state, self.png) = heatKernel.main(self.iterations,self.beta, self.state)
         end = time.time()
-        print "gpu: " + str(round_to(2,1000*(end - start)))
+        self.message = "gpu: " + str(round_to(2,1000*(end - start))) + "ms"
+        print self.message
         # print self.png.get().astype(np.uint8)
         # print type(self.png.get().astype(np.uint8))
         outfile = "image/heat_image" + str(self.count) + ".png"
@@ -141,7 +143,8 @@ class Data():
       outfile = "./image/heat_image0.png"
       misc.imsave(outfile, self.png.get().astype(np.uint8))
       self.count = 0
-      print "beta = " + str(self.beta) + ", iterations = " + str(self.iterations)
+      self.message = "beta = " + str(self.beta) + ", iterations = " + str(self.iterations)
+      print self.message
 
 
 
@@ -171,7 +174,7 @@ def parse(str):
 def step(count):
     myData.count = int(count)
     myData.step()
-    return "image: " + str(myData.count)
+    return myData.message
 
 def play(count):
     myData.count = int(count)
@@ -184,7 +187,7 @@ def reset():
         os.remove(f)
 
     myData.reset()
-    return "server: reset"
+    return myData.message
 
 
 def data():
@@ -233,7 +236,7 @@ def response(command_string):
            return op[c['cmd']](c['arg'])
     else:
         file_path = c['cmd']
-        while  !(os. path. isfile(file_path)):
+        while  (os. path. isfile(file_path)) == False:
             time.sleep(0.05)
         with open(file_path , "rb") as binaryfile :
            myArr = bytearray(binaryfile.read())

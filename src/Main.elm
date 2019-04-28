@@ -11,6 +11,7 @@ import Browser
 import Html exposing (Html)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Element.Keyed as Keyed
@@ -173,7 +174,7 @@ update msg model =
             ( { model | message = "Error getting data" }, Cmd.none )
 
         CommandExecuted (Ok str) ->
-            ( { model | message = "Command executed: " ++ str }, Cmd.none )
+            ( { model | message = str }, Cmd.none )
 
         CommandExecuted (Err err) ->
             ( { model | message = "Error executing command" }, Cmd.none )
@@ -215,28 +216,40 @@ dataCommand dataSize cmd =
 
 view : Model -> Html Msg
 view model =
-    Element.layout [] (mainColumn model)
+    Element.layout [width fill, height fill, Background.color (Element.rgb 0 0 0)] (mainColumn model)
 
 
 mainColumn : Model -> Element Msg
 mainColumn model =
     column mainColumnStyle
-        [ column [ centerX, spacing 20 ]
-            [ title "Diffusion of Heat"
-            , el [] (renderHeatImage model)
-            , row [ spacing 18 ]
-                [ resetButton model
-                , runButton model
-                , row [ spacing 8 ] [ getDataButton, counterDisplay model ]
-                , inputBeta model
-                -- , inputN model
-                ]
-            , inputIterations model
-            , el [ Font.size 14, centerX ] (text "Run with 0 < beta < 1.0")
-            , el [ Font.size 14 ] (text model.message)
+        [ column [ centerX, spacing 40, Background.color black ]
+            [  el [centerX, centerY] (renderHeatImage model)
+            , controls model
+            , row[spacing 12, moveUp 10] [
+                 el [ Font.size 14, centerX, Font.color grey ] (text "Run with 0 < beta < 1.0")
+               , el [ Font.size 14, Font.color grey ] (text model.message)
+               ]
             ]
         ]
 
+controls : Model -> Element Msg
+controls model =
+    row [spacing 24, padding 20, Border.width 1, Border.color grey, width (px 900)] [
+      row [ spacing 24, width (px 450) ]
+                      [ resetButton model
+                      , runButton model
+                      , getDataButton
+                      , counterDisplay model
+                      ]
+                  , row [spacing 18, width (px 400)] [
+                        inputBeta model
+                     ,  inputIterations model
+
+                    ]
+    ]
+
+counterDisplay model =
+     el [  Font.size 14, centerX, Font.color white ] (text <| "t = " ++ (String.fromInt model.counter))
 
 renderHeatImage : Model -> Element Msg
 renderHeatImage model =
@@ -253,15 +266,14 @@ renderHeatImage model =
          )
 
 
-counterDisplay : Model -> Element Msg
-counterDisplay model =
-    el [ Font.size 18, width (px 30) ] (text <| String.fromInt model.counter)
-
 
 title : String -> Element msg
 title str =
-    row [ centerX, Font.bold ] [ text str ]
+    row [ centerX, Font.bold, Font.color white ] [ text str ]
 
+white = Element.rgb 1 1 1
+black = Element.rgb 0 0 0
+grey = Element.rgb 0.5 0.5 0.5
 
 outputDisplay : Model -> Element msg
 outputDisplay model =
@@ -304,11 +316,11 @@ inputN model =
 
 
 inputTextStyle =
-    [ width (px 60), Font.size buttonFontSize, height (px 30) ]
+    [ width (px 60), Font.size buttonFontSize, height (px 30), Font.color white, Background.color grey ]
 
 
 inputTextLabelStyle =
-    [ Font.size buttonFontSize, moveDown 6 ]
+    [ Font.size buttonFontSize, Font.color grey, Background.color black, moveDown 6 ]
 
 
 getDataButton : Element Msg
@@ -334,10 +346,10 @@ runButton model =
 activeBackgroundColor model =
     case model.appState of
         Running ->
-            Background.color (Element.rgb 0.65 0 0)
+            Background.color (Element.rgb 0.50 0.1 0.1)
 
         _ ->
-            Background.color (Element.rgb 0 0 0)
+            Background.color grey
 
 
 resetButton : Model -> Element Msg
@@ -381,14 +393,15 @@ appStateAsString appState =
 mainColumnStyle =
     [ centerX
     , centerY
-    , Background.color (rgb255 240 240 240)
-    , paddingXY 20 20
+    , Background.color black
+    , paddingXY 60 40
+
     ]
 
 
 buttonStyle =
-    [ Background.color (rgb255 40 40 40)
-    , Font.color (rgb255 255 255 255)
+    [ Background.color grey
+    , Font.color white
     , paddingXY 15 8
     , Font.size buttonFontSize
     ]
