@@ -1,10 +1,10 @@
 module Main exposing (main)
 
 {- This app is a demo of how computationally intensive tasks, in this case appliction
-of the discrete heat kernel, can be offloaded to Futhark embedded in a Python server
-that talks to the Elm app.
+   of the discrete heat kernel, can be offloaded to Futhark embedded in a Python server
+   that talks to the Elm app.
 
-Still in a crude state/
+   Still in a crude state/
 -}
 
 import Browser
@@ -18,11 +18,10 @@ import HeatMap exposing (HeatMap(..))
 import Time exposing (Posix)
 import Configuration
 import Http
-import Array exposing(Array)
+import Array exposing (Array)
 import Utility
-import Bytes exposing(Bytes, Endianness(..))
+import Bytes exposing (Bytes, Endianness(..))
 import Bytes.Decode
-
 
 
 tickInterval : Float
@@ -38,7 +37,10 @@ main =
         , subscriptions = subscriptions
         }
 
-type alias Data = Array (Array Float)
+
+type alias Data =
+    Array (Array Float)
+
 
 type alias Model =
     { input : String
@@ -48,8 +50,6 @@ type alias Model =
     , nString : String
     , betaString : String
     , iterationsString : String
-    , heatMapSize : Int
-    , heatMap : Maybe HeatMap
     , message : String
     }
 
@@ -73,7 +73,7 @@ type Msg
     | AdvanceAppState
     | Reset
     | GetData
-    | GotData (Result Http.Error Bytes)
+    | GotData (Result Http.Error String)
     | CommandExecuted (Result Http.Error String)
 
 
@@ -90,11 +90,9 @@ init flags =
       , nString = "20"
       , betaString = "0.1"
       , iterationsString = "1"
-      , heatMapSize = 20
-      , heatMap = Nothing
       , message = ""
       }
-    , dataCommand (20*20) "reset"
+    , Cmd.none
     )
 
 
@@ -122,20 +120,20 @@ update msg model =
                     ( { model | nString = str }, Cmd.none )
 
                 Just n_ ->
-                    ( { model | nString = str, heatMapSize = n_ }, serverCommand <| "n=" ++ str )
+                    ( { model | nString = str }, serverCommand <| "n=" ++ str )
 
         InputIterations str ->
-                    case String.toInt str of
-                        Nothing ->
-                            ( { model | iterationsString = str }, Cmd.none )
+            case String.toInt str of
+                Nothing ->
+                    ( { model | iterationsString = str }, Cmd.none )
 
-                        Just n_ ->
-                            ( { model | iterationsString = str }, serverCommand <| "iterations=" ++ str )
+                Just n_ ->
+                    ( { model | iterationsString = str }, serverCommand <| "iterations=" ++ str )
 
         Tick t ->
             case model.appState == Running of
                 True ->
-                    ( { model | counter = model.counter + 1 }, dataCommand  (nBytesInData model) <| "step=" ++ model.iterationsString)
+                    ( { model | counter = model.counter + 1 }, serverCommand <| "step=" ++ model.iterationsString )
 
                 False ->
                     ( model, Cmd.none )
@@ -156,37 +154,29 @@ update msg model =
                 ( { model | appState = nextAppState }, Cmd.none )
 
         Reset ->
-            ( { model | counter = 0, appState = Ready, heatMap = Nothing }, dataCommand (nBytesInData model) "reset" )
+            ( { model | counter = 0, appState = Ready }, serverCommand "reset" )
 
         GetData ->
-            ( { model | message = "Getting data" }, dataCommand (nBytesInData model) <| "step=" ++ model.iterationsString)
+            ( { model | message = "Getting data", counter = model.counter + 1 }, serverCommand <| "step=" ++ model.iterationsString )
 
-        GotData (Ok bytes) ->
-            let
-                n_ = model.heatMapSize * model.heatMapSize
-            in
-            case Bytes.Decode.decode (Utility.decodeArray n_ (Bytes.Decode.float32 LE)) bytes of
-                 Nothing -> ( { model | message = "Could not decode data from server"} , Cmd.none)
-                 Just array ->
-                     let
-                        n = model.heatMapSize
-                      in
-                        ( { model | counter = model.counter + 1, message = "Got data",  heatMap = Just <| HeatMap (n,n) array}, Cmd.none )
-
+        GotData (Ok str) ->
+            ({model | message = str}, Cmd.none)
 
         GotData (Err err) ->
-            ( { model | message = "Error getting data", heatMap  = Nothing}, Cmd.none )
+            ( { model | message = "Error getting data" }, Cmd.none )
 
         CommandExecuted (Ok str) ->
-            ( {model | message = "Command executed: " ++ str}, Cmd.none)
+            ( { model | message = "Command executed: " ++ str }, Cmd.none )
 
         CommandExecuted (Err err) ->
-                    ( {model | message = "Error executing command"}, Cmd.none)
+            ( { model | message = "Error executing command" }, Cmd.none )
+
 
 
 --
 -- BACKEND
 --
+
 
 serverCommand : String -> Cmd Msg
 serverCommand cmd =
@@ -195,15 +185,21 @@ serverCommand cmd =
         , expect = Http.expectString CommandExecuted
         }
 
+rawServerCommand : String -> Cmd Msg
+rawServerCommand url =
+    Http.get
+        { url = url
+        , expect = Http.expectString CommandExecuted
+        }
+
 dataCommand : Int -> String -> Cmd Msg
 dataCommand dataSize cmd =
     Http.get
         { url = Configuration.host ++ "/" ++ cmd
-        , expect = Http.expectBytes GotData (Bytes.Decode.bytes dataSize)
+        , expect = Http.expectString GotData
         }
 
-nBytesInData: Model -> Int
-nBytesInData model = 4*model.heatMapSize*model.heatMapSize
+
 
 --
 -- VIEW
@@ -220,7 +216,7 @@ mainColumn model =
     column mainColumnStyle
         [ column [ centerX, spacing 20 ]
             [ title "Diffusion of Heat"
-            , el [] (renderHeatMap model)
+            , el [] (renderHeatImage model)
             , row [ spacing 18 ]
                 [ resetButton model
                 , runButton model
@@ -228,17 +224,27 @@ mainColumn model =
                 , inputBeta model
                 , inputN model
                 ]
-            , inputIterations model, el [ Font.size 14, centerX ] (text "Run with 0 < beta < 1.0")
+            , inputIterations model
+            , el [ Font.size 14, centerX ] (text "Run with 0 < beta < 1.0")
             , el [ Font.size 14 ] (text model.message)
             ]
         ]
 
 
-renderHeatMap : Model -> Element Msg
-renderHeatMap model =
-    case model.heatMap of
-        Nothing -> Keyed.el [] (String.fromInt model.counter, (HeatMap.renderAsHtml HeatMap.default |> Element.html))
-        Just heatMap -> Keyed.el [] (String.fromInt model.counter, (HeatMap.renderAsHtml heatMap |> Element.html))
+renderHeatImage : Model -> Element Msg
+renderHeatImage model =
+    let
+        n = model.counter
+        url = "http://localhost:8002/heat_image" ++ (String.fromInt (max 0 (n - 2))) ++ ".png"
+    in
+      Keyed.el [] ( String.fromInt model.counter,
+        column [spacing 10] [
+         Element.image [] {
+             src = url
+           , description = url}
+         , el [Font.size 12] (text url)
+         ]
+         )
 
 
 counterDisplay : Model -> Element Msg
@@ -270,6 +276,7 @@ inputBeta model =
         , label = Input.labelLeft [] <| el inputTextLabelStyle (text "beta ")
         }
 
+
 inputIterations : Model -> Element Msg
 inputIterations model =
     Input.text inputTextStyle
@@ -278,6 +285,7 @@ inputIterations model =
         , placeholder = Nothing
         , label = Input.labelLeft [] <| el inputTextLabelStyle (text "iterations/step ")
         }
+
 
 inputN : Model -> Element Msg
 inputN model =
@@ -288,10 +296,13 @@ inputN model =
         , label = Input.labelLeft [] <| el inputTextLabelStyle (text "rows ")
         }
 
-inputTextStyle = [ width (px 60), Font.size buttonFontSize, height (px 30) ]
 
-inputTextLabelStyle = [ Font.size buttonFontSize, moveDown 6 ]
+inputTextStyle =
+    [ width (px 60), Font.size buttonFontSize, height (px 30) ]
 
+
+inputTextLabelStyle =
+    [ Font.size buttonFontSize, moveDown 6 ]
 
 
 getDataButton : Element Msg
@@ -332,11 +343,16 @@ resetButton model =
             }
         ]
 
+
 resetLabel : AppState -> String
 resetLabel appState =
     case appState of
-        Ready -> "Set up"
-        _ -> "Reset"
+        Ready ->
+            "Set up"
+
+        _ ->
+            "Reset"
+
 
 appStateAsString : AppState -> String
 appStateAsString appState =

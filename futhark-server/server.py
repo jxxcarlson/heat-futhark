@@ -69,6 +69,9 @@ import png
 import heat # import heat.py
 import time
 
+def round_to(k, x):
+    return round(x*(10**k))/(10**k)
+
 png.from_array([[255, 0, 0, 255],
                 [0, 255, 255, 0]], 'L').save("small_smiley.png")
 
@@ -90,13 +93,19 @@ heatKernel = heat.heat()
 class Data():
   def __init__(self, n):
         self.n = n
-        data = np.random.rand(n,n)
+        data = np.random.rand(self.n,self.n)
+        for i in range(self.n//2, 4*self.n//5):
+           for j in range(self.n//2, 4*self.n//5):
+              data[i,j] = 0
+        for i in range(self.n//5, 2*self.n/5):
+           for j in range(self.n//5, 2*self.n//5):
+            data[i,j] = 1.0
         array = np.array(data, dtype=np.float32)
         self.state = array
         self.png = []
         self.count = 0
         self.iterations = 1
-        self.beta = 0.1
+        self.beta = 0.5
 
   ## def save(self):
 
@@ -109,10 +118,10 @@ class Data():
         start = time.time()
         (self.state, self.png) = heatKernel.main(self.iterations,self.beta, self.state)
         end = time.time()
-        print 1000*(end - start)
+        print "gpu: " + str(round_to(2,1000*(end - start)))
         # print self.png.get().astype(np.uint8)
         # print type(self.png.get().astype(np.uint8))
-        outfile = "heat_image_" + str(self.count) + ".png"
+        outfile = "heat_image" + str(self.count) + ".png"
         misc.imsave(outfile, self.png.get().astype(np.uint8))
         self.count = self.count + 1
 
@@ -126,6 +135,7 @@ class Data():
               data[i,j] = 1.0
       array = np.array(data, dtype=np.float32)
       self.state = array
+      self.count = 0
 
   def set_beta(self, beta):
       self.beta = beta
@@ -138,7 +148,7 @@ class Data():
     print ("In set_iterations (X), iterations = " + str(self.iterations))
 
 
-myData = Data(20)
+myData = Data(400)
 
 ### END: MANIPULATE DATA USING FUTHARK ####
 
@@ -154,7 +164,9 @@ def step(n_iterations):
     myData.iterations = int(n_iterations)
     myData.step()
     nn = myData.n * myData.n
-    return myData.state.reshape(1,nn).get()[0].tobytes()
+    # return myData.state.reshape(1,nn).get()[0].tobytes()
+    # return myData.png.get().astype(np.uint8).tobytes()
+    return "image: " + str(myData.count)
 
 def reset():
     myData.reset()
@@ -208,6 +220,7 @@ def response(command_string):
        return defaultResponse()
 
 
+
 class S(BaseHTTPRequestHandler):
 
     def _set_headers(self):
@@ -217,11 +230,14 @@ class S(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        start = time.time()
         self._set_headers()
-        self.wfile.write(response(self.path))
+        data = response(self.path)
+        start = time.time()
+        self.wfile.write(data)
         end = time.time()
-        print 1000*(end - start)
+        print "save file: " + str(round_to(2, 1000*(end - start)))
+        print "count: " + str(myData.count)
+        print "------------"
 
     def do_HEAD(self):
         self._set_headers()
