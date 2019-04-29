@@ -94,7 +94,7 @@ init flags =
       , iterationsString = "1"
       , message = ""
       }
-    , Cmd.none
+    , serverCommand "reset"
     )
 
 
