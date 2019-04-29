@@ -27,7 +27,7 @@ import Bytes.Decode
 
 tickInterval : Float
 tickInterval =
-    500
+    250
 
 
 main =
@@ -90,8 +90,8 @@ init flags =
       , counter = 0
       , appState = Ready
       , nString = "20"
-      , betaString = "0.1"
-      , iterationsString = "1"
+      , betaString = "0.5"
+      , iterationsString = "100"
       , message = ""
       }
     , serverCommand "reset"
@@ -255,16 +255,19 @@ renderHeatImage : Model -> Element Msg
 renderHeatImage model =
     let
         n = model.counter
-        url = "http://localhost:8001/image/heat_image" ++ (String.fromInt (max 0 (n))) ++ ".png"
+        urlPrevious = "http://localhost:8001/image/heat_image" ++ (String.fromInt (max 0 (n - 1))) ++ ".png"
+        urlCurrent = "http://localhost:8001/image/heat_image" ++ (String.fromInt (max 0 (n))) ++ ".png"
     in
       Keyed.el [] ( String.fromInt model.counter,
         column [spacing 10] [
-         Element.image [height (px 400)] {
-             src = url
-           , description = ""}
+          el [Element.inFront (renderImage urlPrevious) ] (renderImage urlCurrent)
          ]
          )
 
+renderImage url =
+    Element.image [height (px 400), width (px 400), alpha 1.0 ] {
+                 src = url
+               , description = ""}
 
 
 title : String -> Element msg

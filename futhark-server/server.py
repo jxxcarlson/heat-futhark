@@ -67,6 +67,7 @@ from scipy import misc
 import png
 import heat # import heat.py
 import time
+import shutil
 
 def round_to(k, x):
     return round(x*(10**k))/(10**k)
@@ -103,7 +104,7 @@ class Data():
         self.state = array
         self.png = []
         self.count = 0
-        self.iterations = 1
+        self.iterations = 100
         self.beta = 0.5
         self.message = "starting ..."
 
@@ -120,8 +121,6 @@ class Data():
         end = time.time()
         self.message = "gpu: " + str(round_to(2,1000*(end - start))) + "ms"
         print self.message
-        # print self.png.get().astype(np.uint8)
-        # print type(self.png.get().astype(np.uint8))
         outfile = "image/heat_image" + str(self.count) + ".png"
         misc.imsave(outfile, self.png.get().astype(np.uint8))
 
@@ -174,6 +173,8 @@ def parse(str):
 def step(count):
     myData.count = int(count)
     myData.step()
+    print "count = " + str(myData.count)
+    print "beta = " + str(myData.beta) + ", iterations/step = " + str(myData.iterations)
     return myData.message
 
 def play(count):
@@ -182,9 +183,10 @@ def play(count):
     return "image: " + str(myData.count)
 
 def reset():
-    filelist = glob.glob(os.path.join("./image", "*.png"))
+    filelist = glob.glob(os.path.join("./image", "heat_image*.png"))
     for f in filelist:
         os.remove(f)
+    shutil.copyfile("./image/initial_image.png", "./image/heat_image0.png")
 
     myData.reset()
     return myData.message
@@ -237,7 +239,7 @@ def response(command_string):
     else:
         file_path = c['cmd']
         while  (os. path. isfile(file_path)) == False:
-            time.sleep(0.05)
+            time.sleep(0.1)
         with open(file_path , "rb") as binaryfile :
            myArr = bytearray(binaryfile.read())
            print "length(myArr) = " + str(len(myArr))
@@ -260,7 +262,6 @@ class S(BaseHTTPRequestHandler):
         self.wfile.write(data)
         end = time.time()
         print "save file: " + str(round_to(2, 1000*(end - start)))
-        print "count: " + str(myData.count)
         print "------------"
 
     def do_HEAD(self):
