@@ -2,7 +2,10 @@
 
 ## Introduction
 
-This little project is a test-of-concept for integration of [Futhark](https://futhark-lang.org) with [Elm](https://elm-lang.org)  The idea is to off-load computationally expensive work to Futhark, which can use the host's GPU.  The current idea is to run a Python server which calls Futhark code to do the expensive work.  This work is done on demand when the server receives a GET request from the client.  The server holds a `state` which in the example here is a 2D array of floats. On each request, the server sends the current value of `state` to the client, then uses Futhark to perform the update `state -> f(state)` for some function `f` of interest.
+This little project is a test-of-concept for integration of [Futhark](https://futhark-lang.org) with [Elm](https://elm-lang.org) in the context of simulating the conduction of heat in a thin metal plate.  For pure Elm version which works well for small grid sizes, see [this demo](https://jxxcarlson.github.io/app/heat-model.html).
+
+
+The idea is to off-load computationally expensive work to Futhark, which can use the host's GPU.  The current idea is to run a Python server which calls Futhark code to do the expensive work.  This work is done on demand when the server receives a GET request from the client.  The server holds a `state` which in the example here is a 2D array of floats. On each request, the server sends the current value of `state` to the client, then uses Futhark to perform the update `state -> f(state)` for some function `f` of interest.
 
 (For some othe work on Futhark, see [this repo](https://github.com/jxxcarlson/pca-fut)).
 
